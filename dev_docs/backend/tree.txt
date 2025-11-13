@@ -1,0 +1,52 @@
+backend/
+├── src/
+│   ├── main.ts
+│   ├── app.module.ts
+│   ├── config/
+│   │   ├── database.config.ts
+│   │   └── jwt.config.ts
+│   ├── common/
+│   │   ├── guards/
+│   │   ├── interceptors/
+│   │   ├── decorators/
+│   │   └── utils/
+│   ├── auth/
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.module.ts
+│   │   ├── dto/
+│   │   └── strategies/
+│   ├── users/
+│   │   ├── users.controller.ts
+│   │   ├── users.service.ts
+│   │   ├── users.module.ts
+│   │   ├── entities/
+│   │   └── dto/
+│   ├── roles/
+│   │   ├── roles.controller.ts
+│   │   ├── roles.service.ts
+│   │   ├── roles.module.ts
+│   │   └── entities/
+│   ├── requests/
+│   │   ├── requests.controller.ts
+│   │   ├── requests.service.ts
+│   │   ├── requests.module.ts
+│   │   ├── entities/
+│   │   └── dto/
+│   ├── offers/
+│   │   ├── offers.controller.ts
+│   │   ├── offers.service.ts
+│   │   ├── offers.module.ts
+│   │   ├── entities/
+│   │   └── dto/
+│   ├── reports/
+│   │   ├── reports.controller.ts
+│   │   ├── reports.service.ts
+│   │   ├── reports.module.ts
+│   │   └── entities/
+│   └── notifications/
+│       ├── notifications.controller.ts
+│       ├── notifications.service.ts
+│       ├── notifications.module.ts
+│       └── dto/
+└── test/
