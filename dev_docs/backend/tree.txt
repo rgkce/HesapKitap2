@@ -10,12 +10,28 @@ backend/
 │   │   ├── interceptors/
 │   │   ├── decorators/
 │   │   └── utils/
+│   │
 │   ├── auth/
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
+│   │   ├── auth.controller.ts       
 │   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   │   |
+│   │   ├── decorators/
+│   │   │   └── roles.decorator.ts
+│   │   │
 │   │   ├── dto/
-│   │   └── strategies/
+│   │   │   ├── login.dto.ts
+│   │   │   ├── refresh-token.dto.ts
+│   │   │   └── register.dto.ts
+│   │   │
+│   │   ├──guards/
+│   │   │  ├── jwt-auth.guard.ts
+│   │   │  └── roles.guard.ts
+│   │   │
+│   │   └── strategies
+│   │       ├── jwt.strategy.ts
+│   │       └──local.strategy.ts
+│   │
 │   ├── users/
 │   │   ├── users.controller.ts
 │   │   ├── users.service.ts
