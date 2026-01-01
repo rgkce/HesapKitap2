@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:hesapkitap/core/theme/app_colors.dart';
-import 'package:hesapkitap/core/theme/app_styles.dart';
 
-class AdminNavBar extends StatelessWidget {
+class ProcurementNavBar extends StatelessWidget {
   final int currentIndex;
 
-  const AdminNavBar({super.key, required this.currentIndex});
+  const ProcurementNavBar({super.key, required this.currentIndex});
 
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/admin_home');
+        Navigator.pushReplacementNamed(context, '/procurement_home');
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, '/admin_users');
+        Navigator.pushReplacementNamed(context, '/procurement_requests');
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, '/admin_requests');
+        Navigator.pushReplacementNamed(context, '/procurement_add_quote');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/admin_reports');
+        Navigator.pushReplacementNamed(context, '/procurement_reports');
         break;
       case 4:
-        Navigator.pushReplacementNamed(context, '/admin_profile');
+        Navigator.pushReplacementNamed(context, '/procurement_profile');
         break;
     }
   }
@@ -48,8 +47,8 @@ class AdminNavBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _navItem(context, 0, Icons.home, "Ana Sayfa"),
-            _navItem(context, 1, Icons.group, "Kullanıcılar"),
-            _navItem(context, 2, Icons.list_alt, "Talepler"),
+            _navItem(context, 1, Icons.list, "Talepler"),
+            _navItem(context, 2, Icons.add_circle_outline, "Teklif Ver"),
             _navItem(context, 3, Icons.bar_chart, "Raporlar"),
             _navItem(context, 4, Icons.person, "Profil"),
           ],
@@ -65,22 +64,23 @@ class AdminNavBar extends StatelessWidget {
     String label,
   ) {
     final bool isActive = index == currentIndex;
-    final Color activeColor = AppColors.accent;
-    final Color inactiveColor = AppColors.grey400;
-
     return GestureDetector(
       onTap: () => _onItemTapped(context, index),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isActive ? activeColor : inactiveColor, size: 28),
+          Icon(
+            icon,
+            color: isActive ? AppColors.accent : AppColors.grey400,
+            size: 26,
+          ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: AppStyles.bodyText.copyWith(
-              color: isActive ? activeColor : inactiveColor,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            style: TextStyle(
               fontSize: 12,
+              color: isActive ? AppColors.accent : AppColors.grey400,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],

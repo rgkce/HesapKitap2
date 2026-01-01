@@ -2,27 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:hesapkitap/core/theme/app_colors.dart';
 import 'package:hesapkitap/core/theme/app_styles.dart';
 
-class AdminNavBar extends StatelessWidget {
+class ManagerNavBar extends StatelessWidget {
   final int currentIndex;
 
-  const AdminNavBar({super.key, required this.currentIndex});
+  const ManagerNavBar({super.key, required this.currentIndex});
 
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/admin_home');
+        Navigator.pushReplacementNamed(context, '/manager_home');
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, '/admin_users');
+        Navigator.pushReplacementNamed(context, '/manager_offers');
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, '/admin_requests');
+        Navigator.pushReplacementNamed(context, '/manager_createrequest');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/admin_reports');
+        Navigator.pushReplacementNamed(context, '/manager_reports');
         break;
       case 4:
-        Navigator.pushReplacementNamed(context, '/admin_profile');
+        Navigator.pushReplacementNamed(context, '/manager_profile');
         break;
     }
   }
@@ -48,8 +48,8 @@ class AdminNavBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _navItem(context, 0, Icons.home, "Ana Sayfa"),
-            _navItem(context, 1, Icons.group, "Kullanıcılar"),
-            _navItem(context, 2, Icons.list_alt, "Talepler"),
+            _navItem(context, 1, Icons.shopping_cart, "Teklifler"),
+            _navItem(context, 2, Icons.request_page, "Talep Oluştur"),
             _navItem(context, 3, Icons.bar_chart, "Raporlar"),
             _navItem(context, 4, Icons.person, "Profil"),
           ],
@@ -80,7 +80,7 @@ class AdminNavBar extends StatelessWidget {
             style: AppStyles.bodyText.copyWith(
               color: isActive ? activeColor : inactiveColor,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-              fontSize: 12,
+              fontSize: 10,
             ),
           ),
         ],

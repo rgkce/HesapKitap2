@@ -2,41 +2,46 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppStyles {
-  // Başlıklar
+  // Headings
   static const TextStyle heading1 = TextStyle(
     fontSize: 28,
-    fontWeight: FontWeight.bold,
-    color: AppColors.textDark,
+    fontWeight: FontWeight.w800, // Extra bold for primary headers
+    letterSpacing: -0.5,
   );
 
   static const TextStyle heading2 = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textDark,
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
+    letterSpacing: -0.5,
   );
 
   static const TextStyle heading3 = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w500,
-    color: AppColors.textDark,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
   );
 
-  // Normal metin
+  // Body
   static const TextStyle bodyText = TextStyle(
-    fontSize: 16,
-    color: AppColors.textDark,
+    fontSize: 15,
+    height: 1.5, // Better readability
   );
 
   static const TextStyle bodyTextBold = TextStyle(
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: FontWeight.bold,
-    color: AppColors.textDark,
+    height: 1.5,
   );
 
-  // Butonlar
+  // Buttons & Labels
   static const TextStyle buttonText = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w600,
     color: AppColors.textLight,
+  );
+
+  static const TextStyle caption = TextStyle(
+    fontSize: 12,
+    color: AppColors.textGrey,
+    fontWeight: FontWeight.w500,
   );
 }

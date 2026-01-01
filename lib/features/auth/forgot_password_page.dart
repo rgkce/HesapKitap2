@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hesapkitap/core/theme/app_colors.dart';
-import 'package:hesapkitap/core/theme/app_styles.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -50,134 +49,89 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Gradient Arka Plan
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors:
-                    isDark
-                        ? [
-                          AppColors.grey800,
-                          AppColors.primary.withOpacity(0.8),
-                        ]
-                        : [
-                          AppColors.primary.withOpacity(0.8),
-                          AppColors.accent.withOpacity(0.8),
-                        ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          color: isDark ? AppColors.textLight : AppColors.textDark,
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Logo
+              Container(
+                width: 120,
+                height: 120,
+                decoration: const BoxDecoration(shape: BoxShape.circle),
+                child: Image.asset('assets/hk-logo.png', fit: BoxFit.cover),
               ),
-            ),
-          ),
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo
-                  Container(
-                    width: 150,
-                    height: 150,
-                    decoration: const BoxDecoration(shape: BoxShape.circle),
-                    child: Image.asset('assets/hk-logo.png', fit: BoxFit.cover),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Şifremi Unuttum",
-                    style: AppStyles.heading1.copyWith(
-                      color: isDark ? AppColors.secondary : AppColors.textLight,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  // Email Input
-                  TextField(
-                    controller: _emailController,
-                    style: AppStyles.buttonText.copyWith(
-                      color: isDark ? AppColors.textLight : AppColors.textDark,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: "Email",
-                      hintStyle: AppStyles.buttonText.copyWith(
-                        color: isDark ? AppColors.grey400 : AppColors.grey800,
-                      ),
-                      filled: true,
-                      fillColor:
-                          isDark
-                              ? AppColors.grey800.withOpacity(0.3)
-                              : AppColors.textLight.withOpacity(0.8),
-                      prefixIcon: Icon(
-                        Icons.email,
-                        color: isDark ? AppColors.textLight : AppColors.primary,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  // Gönder Butonu
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _sendPasswordReset,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 5,
-                      ),
-                      child:
-                          _isLoading
-                              ? const CircularProgressIndicator(
-                                color: AppColors.textLight,
-                              )
-                              : Ink(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      AppColors.primary,
-                                      AppColors.accent,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "Şifre Sıfırlama Linki Gönder",
-                                    textAlign: TextAlign.center,
-                                    style: AppStyles.buttonText.copyWith(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      "Geri Dön",
-                      style: AppStyles.bodyTextBold.copyWith(
-                        color:
-                            isDark ? AppColors.secondary : AppColors.textLight,
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 20),
+              Text(
+                "Şifremi Unuttum",
+                style: Theme.of(context).textTheme.displayLarge,
               ),
-            ),
+              const SizedBox(height: 10),
+              Text(
+                "Şifre sıfırlama talimatları için kayıtlı e-posta adresinizi girin.",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: isDark ? AppColors.grey400 : AppColors.grey600,
+                ),
+              ),
+              const SizedBox(height: 40),
+              // Email Input
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: "Email",
+                  prefixIcon: Icon(Icons.email),
+                ),
+              ),
+              const SizedBox(height: 30),
+              // Gönder Butonu
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _sendPasswordReset,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : const Text(
+                            "Link Gönder",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

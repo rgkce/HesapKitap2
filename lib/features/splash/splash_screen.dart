@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hesapkitap/core/theme/app_colors.dart';
 import 'package:hesapkitap/core/theme/app_styles.dart';
+import 'package:hesapkitap/core/services/user_service.dart';
+import 'package:hesapkitap/core/models/user_model.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,8 +36,29 @@ class _SplashScreenState extends State<SplashScreen>
 
     // 3 saniye sonra yönlendirme
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/login');
+      _navigateToNextScreen();
     });
+  }
+
+  void _navigateToNextScreen() {
+    final user = UserService().currentUser;
+
+    if (user == null) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      // Redirect based on user role
+      switch (user.role) {
+        case UserRole.admin:
+          Navigator.pushReplacementNamed(context, '/admin_home');
+          break;
+        case UserRole.manager:
+          Navigator.pushReplacementNamed(context, '/manager_home');
+          break;
+        case UserRole.procurement:
+          Navigator.pushReplacementNamed(context, '/procurement_home');
+          break;
+      }
+    }
   }
 
   @override
@@ -52,17 +75,10 @@ class _SplashScreenState extends State<SplashScreen>
       body: AnimatedContainer(
         duration: const Duration(seconds: 2),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors:
-                isDark
-                    ? [AppColors.grey400, AppColors.primary.withOpacity(0.8)]
-                    : [
-                      AppColors.primary.withOpacity(0.8),
-                      AppColors.accent.withOpacity(0.8),
-                    ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color:
+              isDark
+                  ? AppColors.surfaceDark.withOpacity(0.8)
+                  : AppColors.surfaceLight.withOpacity(0.8),
         ),
         child: Center(
           child: FadeTransition(
@@ -74,16 +90,17 @@ class _SplashScreenState extends State<SplashScreen>
                 children: [
                   // Logo
                   Container(
-                    height: 200,
-                    width: 200,
+                    height: 180,
+                    width: 180,
                     decoration: BoxDecoration(shape: BoxShape.circle),
                     child: Image.asset('assets/hk-logo.png', fit: BoxFit.cover),
                   ),
+                  SizedBox(height: 20),
                   // App İsmi
                   Text(
                     "HesapKitap",
                     style: AppStyles.heading1.copyWith(
-                      color: isDark ? AppColors.secondary : AppColors.textLight,
+                      color: isDark ? AppColors.textLight : AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -91,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     "Finansını kolay yönet",
                     style: AppStyles.heading3.copyWith(
-                      color: isDark ? AppColors.grey400 : AppColors.grey100,
+                      color: isDark ? AppColors.grey100 : AppColors.grey600,
                     ),
                   ),
                 ],

@@ -1,29 +1,41 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Temel Renkler
-  static const Color primary = Color(0xFF3A86FF); // Canlı Mavi
-  static const Color secondary = Color(0xFFFFBE0B); // Altın Sarısı
-  static const Color accent = Color(0xFF8338EC); // Mor Ton
+  // Brand Colors
+  static const Color primary = Color(0xFF1A365D); // Deep Navy
+  static const Color secondary = Color(0xFF4A5568); // Slate Blue
+  static const Color accent = Color(0xFF319795); // Teal
 
-  // Arka Plan
-  static const Color backgroundLight = Color(0xFFF8F9FA); // Açık Tema Arka Plan
-  static const Color backgroundDark = Color(0xFF121212); // Koyu Tema Arka Plan
+  // Backgrounds
+  static const Color backgroundLight = Color(
+    0xFFF1F5F9,
+  ); // Very light slate blue-white
+  static const Color backgroundDark = Color(
+    0xFF020617,
+  ); // Almost black navy (Slate-950) for maximum logo pop
 
-  // Metin Renkleri
-  static const Color textDark = Color(0xFF212529); // Açık Tema Metin
-  static const Color textLight = Color(0xFFFFFFFF); // Koyu Tema Metin
+  // Surface
+  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color surfaceDark = Color(
+    0xFF0F172A,
+  ); // Deeper slate (Slate-900)
 
-  // Ekstra Kullanılabilecek Renkler
-  static const Color success = Color(0xFF06D6A0); // Başarı / Onay
-  static const Color warning = Color(0xFFFF6700); // Uyarı
-  static const Color error = Color(0xFFFF4C4C); // Hata / Dikkat
-  static const Color info = Color(0xFF00B4D8); // Bilgi / Yardım
+  // Text
+  static const Color textDark = Color(0xFF2D3748); // Charcoal
+  static const Color textLight = Color(0xFFFFFFFF);
+  static const Color textGrey = Color(0xFF718096); // Cool Gray
 
-  // Gri Tonlar (Border, Shadow, Disabled)
-  static const Color grey100 = Color(0xFFF1F3F5);
-  static const Color grey200 = Color(0xFFE9ECEF);
-  static const Color grey400 = Color(0xFFADB5BD);
-  static const Color grey600 = Color(0xFF495057);
-  static const Color grey800 = Color(0xFF343A40);
+  // Functional
+  static const Color success = Color(0xFF48BB78); // Emerald
+  static const Color warning = Color(0xFFED8936); // Amber
+  static const Color error = Color(0xFFE53E3E); // Red
+  static const Color info = Color(0xFF4299E1); // Blue
+
+  // Neutrals / UI Elements
+  static const Color grey100 = Color(0xFFEDF2F7);
+  static const Color grey200 = Color(0xFFE2E8F0);
+  static const Color grey300 = Color(0xFFCBD5E0);
+  static const Color grey400 = Color(0xFFA0AEC0);
+  static const Color grey600 = Color(0xFF718096);
+  static const Color grey800 = Color(0xFF2D3748);
 }

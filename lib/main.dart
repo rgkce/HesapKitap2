@@ -1,36 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:hesapkitap/core/theme/app_theme.dart';
 import 'package:hesapkitap/features/auth/forgot_password_page.dart';
+import 'package:hesapkitap/features/auth/change_password_page.dart';
 import 'package:hesapkitap/features/auth/login_page.dart';
-import 'package:hesapkitap/features/auth/role_selection_page.dart';
+
 import 'package:hesapkitap/features/auth/signup_page.dart';
-import 'package:hesapkitap/features/home/admin/admin_home_page.dart';
-import 'package:hesapkitap/features/home/admin/admin_reports_page.dart';
-import 'package:hesapkitap/features/home/admin/admin_user_page.dart';
-import 'package:hesapkitap/features/home/approver/approver_home_page.dart';
-import 'package:hesapkitap/features/home/approver/approver_profile_page.dart';
-import 'package:hesapkitap/features/home/approver/approver_reports_page.dart';
-import 'package:hesapkitap/features/home/approver/approver_request_page.dart';
-import 'package:hesapkitap/features/home/approver/approversupplier_page.dart';
-import 'package:hesapkitap/features/home/customer/customer_create_request_page.dart';
-import 'package:hesapkitap/features/home/customer/customer_dashboard_page.dart.dart';
-import 'package:hesapkitap/features/home/admin/admin_profile_page.dart';
-import 'package:hesapkitap/features/home/customer/customer_offers_page.dart';
-import 'package:hesapkitap/features/home/customer/customer_profile_page.dart';
-import 'package:hesapkitap/features/home/customer/customer_reports_page.dart';
-import 'package:hesapkitap/features/home/customer_approver/customapprover_home_page.dart';
-import 'package:hesapkitap/features/home/customer_approver/customapprover_offers_page.dart';
-import 'package:hesapkitap/features/home/customer_approver/customapprover_profile_page.dart';
-import 'package:hesapkitap/features/home/customer_approver/customapprover_reports_page.dart';
-import 'package:hesapkitap/features/home/supplier/supplier_home_page.dart';
-import 'package:hesapkitap/features/home/supplier/supplier_payments_page.dart';
-import 'package:hesapkitap/features/home/supplier/supplier_profile_page.dart';
-import 'package:hesapkitap/features/home/supplier/supplier_reports_page.dart';
-import 'package:hesapkitap/features/home/supplier/supplier_request_page.dart';
-import 'package:hesapkitap/features/home/supplier/supplier_stock_page.dart';
+import 'package:hesapkitap/features/admin/admin_home_page.dart';
+import 'package:hesapkitap/features/admin/admin_all_requests_page.dart';
+import 'package:hesapkitap/features/admin/admin_user_page.dart';
+import 'package:hesapkitap/features/admin/admin_reports_page.dart';
+import 'package:hesapkitap/features/procurement/procurement_home_page.dart';
+import 'package:hesapkitap/features/procurement/procurement_profile_page.dart';
+import 'package:hesapkitap/features/procurement/procurement_reports_page.dart';
+import 'package:hesapkitap/features/procurement/procurement_requests_page.dart';
+import 'package:hesapkitap/features/procurement/procurement_add_quote_page.dart';
+
+import 'package:hesapkitap/features/manager/manager_create_request_page.dart';
+import 'package:hesapkitap/features/manager/manager_home_page.dart';
+import 'package:hesapkitap/features/admin/admin_profile_page.dart';
+import 'package:hesapkitap/features/manager/manager_offers_page.dart';
+import 'package:hesapkitap/features/manager/manager_profile_page.dart';
+import 'package:hesapkitap/features/manager/manager_reports_page.dart';
+
 import 'package:hesapkitap/features/splash/splash_screen.dart';
+import 'package:hesapkitap/core/services/user_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await UserService().init();
   runApp(const MyApp());
 }
 
@@ -51,40 +48,25 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/forgot_password': (context) => const ForgotPasswordPage(),
-        '/roleSelection':
-            (context) => const RoleSelectionPage(name: '', email: ''),
+        '/change_password': (context) => const ChangePasswordPage(),
         // Admin Routes
         '/admin_home': (context) => const AdminHomePage(),
         '/admin_users': (context) => const AdminUsersPage(),
+        '/admin_requests': (context) => const AdminAllRequestsPage(),
         '/admin_reports': (context) => const AdminReportsPage(),
         '/admin_profile': (context) => const AdminProfilePage(),
-        //Approver Routes
-        '/approver_home': (context) => const ApproverHomePage(),
-        '/approver_requests': (context) => const ApproverRequestsPage(),
-        '/approver_reports': (context) => const ApproverReportsPage(),
-        '/approver_suppliers': (context) => const ApproverSuppliersPage(),
-        '/approver_profile': (context) => const ApproverProfilePage(),
-        //Supplier Routes
-        '/supplier_home': (context) => const SupplierHomePage(),
-        '/supplier_requests': (context) => const SupplierRequestsPage(),
-        '/supplier_reports': (context) => const SupplierReportsPage(),
-        '/supplier_profile': (context) => const SupplierProfilePage(),
-        '/supplier_stock': (context) => const SupplierStockPage(),
-        '/supplier_payments': (context) => const SupplierPaymentsPage(),
-        //Customer Routes
-        '/customer_home': (context) => const CustomerDashboardPage(),
-        '/customer_offers': (context) => CustomerOffersPage(),
-        '/customer_reports': (context) => const CustomerReportsPage(),
-        '/customer_profile': (context) => const CustomerProfilePage(),
-        '/customer_createrequest':
-            (context) => const CustomerCreateRequestPage(),
-        //Customer Approver Routes
-        '/customapprover_home': (context) => const CustomApproverHomePage(),
-        '/customapprover_offers': (context) => CustomApproverOffersPage(),
-        '/customapprover_reports':
-            (context) => const CustomApproverReportsPage(),
-        '/customapprover_profile':
-            (context) => const CustomApproverProfilePage(),
+        // Procurement Routes
+        '/procurement_home': (context) => const ProcurementHomePage(),
+        '/procurement_requests': (context) => const ProcurementRequestsPage(),
+        '/procurement_reports': (context) => const ProcurementReportsPage(),
+        '/procurement_add_quote': (context) => const ProcurementAddQuotePage(),
+        '/procurement_profile': (context) => const ProcurementProfilePage(),
+        // Manager Routes
+        '/manager_home': (context) => const ManagerHomePage(),
+        '/manager_offers': (context) => const ManagerOffersPage(),
+        '/manager_reports': (context) => const ManagerReportsPage(),
+        '/manager_profile': (context) => const ManagerProfilePage(),
+        '/manager_createrequest': (context) => const ManagerCreateRequestPage(),
       },
     );
   }
