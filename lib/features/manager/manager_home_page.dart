@@ -7,6 +7,7 @@ import 'package:hesapkitap/core/services/user_service.dart';
 import 'package:hesapkitap/core/services/request_service.dart';
 import 'package:hesapkitap/core/models/request_model.dart';
 import 'package:intl/intl.dart';
+import 'package:hesapkitap/features/manager/request_offers_page.dart';
 
 class ManagerHomePage extends StatefulWidget {
   const ManagerHomePage({super.key});
@@ -45,6 +46,7 @@ class _ManagerHomePageState extends State<ManagerHomePage> {
             .where(
               (r) =>
                   r.status == RequestStatus.approved ||
+                  r.status == RequestStatus.ordered ||
                   r.status == RequestStatus.completed,
             )
             .length;
@@ -140,7 +142,7 @@ class _ManagerHomePageState extends State<ManagerHomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Son Taleplerim",
+                        "Son Talepler",
                         style: AppStyles.heading2.copyWith(
                           color: isDark ? Colors.white : AppColors.textDark,
                         ),
@@ -296,6 +298,10 @@ class _ManagerHomePageState extends State<ManagerHomePage> {
         statusColor = AppColors.success;
         statusText = "Onaylandı";
         break;
+      case RequestStatus.ordered:
+        statusColor = AppColors.accent;
+        statusText = "Sipariş";
+        break;
       case RequestStatus.rejected:
         statusColor = AppColors.error;
         statusText = "Red";
@@ -320,6 +326,12 @@ class _ManagerHomePageState extends State<ManagerHomePage> {
         ],
       ),
       child: ListTile(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => RequestOffersPage(request: req)),
+          ).then((_) => _loadData());
+        },
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         title: Text(
           req.title,

@@ -68,15 +68,9 @@ class RequestService {
     if (user == null) return [];
 
     // Filter based on user role and company
-    if (user.role == UserRole.admin) {
-      // Admin sees all for their company? Or just users?
-      // Usually Admin manages users, but maybe sees requests too.
+    if (user.role == UserRole.admin || user.role == UserRole.manager) {
+      // Admin and Manager see all requests for their company
       return _requests.where((r) => r.companyId == user.companyId).toList();
-    } else if (user.role == UserRole.manager) {
-      // Manager sees their OWN requests
-      return _requests
-          .where((r) => r.companyId == user.companyId && r.createdBy == user.id)
-          .toList();
     } else if (user.role == UserRole.procurement) {
       // Procurement sees ALL requests for their company to get quotes
       return _requests.where((r) => r.companyId == user.companyId).toList();
@@ -159,6 +153,63 @@ class RequestService {
         title: req.title,
         description: req.description,
         status: RequestStatus.approved, // Ensure status is approved
+        createdBy: req.createdBy,
+        companyId: req.companyId,
+        createdAt: req.createdAt,
+        offers: updatedOffers,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  // Mark as Ordered (for Procurement)
+  Future<bool> markAsOrdered(String requestId) async {
+    int index = _requests.indexWhere((r) => r.id == requestId);
+    if (index != -1) {
+      var req = _requests[index];
+      _requests[index] = RequestModel(
+        id: req.id,
+        title: req.title,
+        description: req.description,
+        status: RequestStatus.ordered,
+        createdBy: req.createdBy,
+        companyId: req.companyId,
+        createdAt: req.createdAt,
+        offers: req.offers,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  // Cancel Approval (for Manager)
+  Future<bool> cancelApproval(String requestId) async {
+    int index = _requests.indexWhere((r) => r.id == requestId);
+    if (index != -1) {
+      var req = _requests[index];
+
+      // Reset all offers to not selected
+      List<OfferModel> updatedOffers =
+          req.offers.map((o) {
+            return OfferModel(
+              id: o.id,
+              requestId: o.requestId,
+              supplierName: o.supplierName,
+              price: o.price,
+              currency: o.currency,
+              description: o.description,
+              paymentMethod: o.paymentMethod ?? "Peşin",
+              paymentTerm: o.paymentTerm ?? 0,
+              isSelected: false,
+            );
+          }).toList();
+
+      _requests[index] = RequestModel(
+        id: req.id,
+        title: req.title,
+        description: req.description,
+        status: RequestStatus.offersReceived, // Back to offersReceived
         createdBy: req.createdBy,
         companyId: req.companyId,
         createdAt: req.createdAt,

@@ -5,6 +5,7 @@ import 'package:hesapkitap/features/navigation/admin_navbar.dart';
 import 'package:hesapkitap/core/services/request_service.dart';
 import 'package:hesapkitap/core/models/request_model.dart';
 import 'package:intl/intl.dart';
+import 'package:hesapkitap/features/manager/request_offers_page.dart';
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -226,6 +227,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
       case RequestStatus.approved:
         statusColor = AppColors.success;
         break;
+      case RequestStatus.ordered:
+        statusColor = AppColors.accent; // Or another distinct color
+        break;
       case RequestStatus.completed:
         statusColor = AppColors.primary;
         break;
@@ -242,42 +246,54 @@ class _AdminHomePageState extends State<AdminHomePage> {
         borderRadius: BorderRadius.circular(12),
       ),
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(req.title, style: AppStyles.bodyTextBold),
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormat("dd/MM/yyyy").format(req.createdAt),
-                    style: AppStyles.bodyText.copyWith(
-                      color: AppColors.grey600,
-                      fontSize: 12,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => RequestOffersPage(request: req)),
+          ).then((_) => _loadData());
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(req.title, style: AppStyles.bodyTextBold),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat("dd/MM/yyyy").format(req.createdAt),
+                      style: AppStyles.bodyText.copyWith(
+                        color: AppColors.grey600,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: statusBgColor,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                req.status.label.toUpperCase(),
-                style: AppStyles.bodyTextBold.copyWith(
-                  color: statusColor,
-                  fontSize: 11,
+                  ],
                 ),
               ),
-            ),
-          ],
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: statusBgColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  req.status.label.toUpperCase(),
+                  style: AppStyles.bodyTextBold.copyWith(
+                    color: statusColor,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

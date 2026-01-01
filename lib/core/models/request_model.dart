@@ -2,6 +2,7 @@ enum RequestStatus {
   pending, // Bekliyor (No offers yet)
   offersReceived, // Teklif Geldi
   approved, // Onaylandı (Offer selected by Manager)
+  ordered, // Sipariş Oluşturuldu (By Procurement)
   rejected, // Reddedildi (By Manager)
   completed, // Tamamlandı (Process finished)
 }
@@ -15,6 +16,8 @@ extension RequestStatusExtension on RequestStatus {
         return "Teklif Geldi";
       case RequestStatus.approved:
         return "Onaylandı";
+      case RequestStatus.ordered:
+        return "Sipariş Oluşturuldu";
       case RequestStatus.rejected:
         return "Reddedildi";
       case RequestStatus.completed:

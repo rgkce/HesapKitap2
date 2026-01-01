@@ -34,6 +34,7 @@ class _ManagerOffersPageState extends State<ManagerOffersPage> {
                 (r) =>
                     r.status == RequestStatus.offersReceived ||
                     r.status == RequestStatus.approved ||
+                    r.status == RequestStatus.ordered ||
                     r.status == RequestStatus.completed,
               )
               .toList();

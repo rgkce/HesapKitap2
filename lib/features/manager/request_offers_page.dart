@@ -59,6 +59,36 @@ class _RequestOffersPageState extends State<RequestOffersPage> {
     }
   }
 
+  void _cancelApproval() async {
+    setState(() => _isLoading = true);
+
+    final success = await RequestService().cancelApproval(_currentRequest.id);
+
+    setState(() => _isLoading = false);
+
+    if (success) {
+      final updatedRequests = RequestService().getRequests();
+      final updatedRequest = updatedRequests.firstWhere(
+        (r) => r.id == _currentRequest.id,
+      );
+      setState(() {
+        _currentRequest = updatedRequest;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Onay iptal edildi.")));
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("İşlem başarısız.")));
+      }
+    }
+  }
+
   void _completeRequest() async {
     AppDialog.show(
       context,
@@ -199,29 +229,71 @@ class _RequestOffersPageState extends State<RequestOffersPage> {
                                         ),
                                       )
                                     else if (offer.isSelected)
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.success.withOpacity(
-                                            0.1,
+                                      Column(
+                                        children: [
+                                          Container(
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.success
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: AppColors.success,
+                                              ),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                "Kabul Edildi",
+                                                style: AppStyles.bodyTextBold
+                                                    .copyWith(
+                                                      color: AppColors.success,
+                                                    ),
+                                              ),
+                                            ),
                                           ),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          border: Border.all(
-                                            color: AppColors.success,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            "Kabul Edildi",
-                                            style: AppStyles.bodyTextBold
-                                                .copyWith(
-                                                  color: AppColors.success,
+                                          if (_currentRequest.status !=
+                                              RequestStatus.completed) ...[
+                                            const SizedBox(height: 8),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: OutlinedButton(
+                                                onPressed:
+                                                    _isLoading
+                                                        ? null
+                                                        : _cancelApproval,
+                                                style: OutlinedButton.styleFrom(
+                                                  foregroundColor:
+                                                      AppColors.error,
+                                                  side: const BorderSide(
+                                                    color: AppColors.error,
+                                                  ),
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 12,
+                                                      ),
                                                 ),
-                                          ),
-                                        ),
+                                                child:
+                                                    _isLoading
+                                                        ? const SizedBox(
+                                                          width: 20,
+                                                          height: 20,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                                color:
+                                                                    AppColors
+                                                                        .error,
+                                                              ),
+                                                        )
+                                                        : const Text(
+                                                          "Onayı İptal Et",
+                                                        ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                   ],
                                 ),
@@ -230,21 +302,51 @@ class _RequestOffersPageState extends State<RequestOffersPage> {
                           },
                         ),
               ),
-              if (UserService().currentUser?.role == UserRole.manager &&
-                  _currentRequest.status == RequestStatus.approved)
+              if ((UserService().currentUser?.role == UserRole.manager ||
+                      UserService().currentUser?.role == UserRole.admin) &&
+                  (_currentRequest.status == RequestStatus.approved ||
+                      _currentRequest.status == RequestStatus.ordered))
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _completeRequest,
-                      icon: const Icon(Icons.check_circle_outline),
-                      label: const Text("Talebi Tamamla"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
+                    child:
+                        _currentRequest.status == RequestStatus.ordered
+                            ? ElevatedButton.icon(
+                              onPressed: _isLoading ? null : _completeRequest,
+                              icon: const Icon(Icons.check_circle_outline),
+                              label: const Text("Talebi Tamamla"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                            )
+                            : Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.warning.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.warning),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.timer_outlined,
+                                    color: AppColors.warning,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "Satınalmadan Sipariş Bekleniyor",
+                                    style: AppStyles.bodyTextBold.copyWith(
+                                      color: AppColors.warning,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                   ),
                 ),
             ],

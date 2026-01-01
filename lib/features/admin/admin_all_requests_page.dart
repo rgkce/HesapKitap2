@@ -168,6 +168,9 @@ class _AdminAllRequestsPageState extends State<AdminAllRequestsPage> {
       case RequestStatus.approved:
         color = AppColors.success;
         break;
+      case RequestStatus.ordered:
+        color = AppColors.accent;
+        break;
       case RequestStatus.completed:
         color = AppColors.primary;
         break;

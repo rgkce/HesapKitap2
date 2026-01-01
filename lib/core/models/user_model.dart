@@ -4,9 +4,9 @@ extension UserRoleExtension on UserRole {
   String get label {
     switch (this) {
       case UserRole.admin:
-        return "Yönetici";
+        return "Admin";
       case UserRole.manager:
-        return "Müdür";
+        return "Yönetici";
       case UserRole.procurement:
         return "Satınalma";
     }

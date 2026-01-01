@@ -30,6 +30,20 @@ class _ProcurementRequestsPageState extends State<ProcurementRequestsPage> {
     });
   }
 
+  void _markAsOrdered(String requestId) async {
+    final success = await RequestService().markAsOrdered(requestId);
+    if (success) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Sipariş oluşturuldu olarak işaretlendi."),
+          ),
+        );
+      }
+      _loadData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -127,35 +141,83 @@ class _ProcurementRequestsPageState extends State<ProcurementRequestsPage> {
                                             ).format(req.createdAt),
                                             style: AppStyles.caption,
                                           ),
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder:
-                                                      (_) =>
-                                                          ProcurementAddQuotePage(
-                                                            request: req,
-                                                          ),
-                                                ),
-                                              ).then((_) => _loadData());
-                                            },
-                                            icon: const Icon(
-                                              Icons.add_circle_outline,
-                                              size: 18,
-                                            ),
-                                            label: const Text("Teklif Ver"),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  AppColors.primary,
-                                              foregroundColor: Colors.white,
+                                          if (req.status ==
+                                              RequestStatus.approved)
+                                            ElevatedButton.icon(
+                                              onPressed:
+                                                  () => _markAsOrdered(req.id),
+                                              icon: const Icon(
+                                                Icons.shopping_cart_checkout,
+                                                size: 18,
+                                              ),
+                                              label: const Text(
+                                                "Sipariş Oluşturuldu",
+                                              ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    AppColors.accent,
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 8,
+                                                    ),
+                                              ),
+                                            )
+                                          else if (req.status ==
+                                                  RequestStatus.pending ||
+                                              req.status ==
+                                                  RequestStatus.offersReceived)
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (_) =>
+                                                            ProcurementAddQuotePage(
+                                                              request: req,
+                                                            ),
+                                                  ),
+                                                ).then((_) => _loadData());
+                                              },
+                                              icon: const Icon(
+                                                Icons.add_circle_outline,
+                                                size: 18,
+                                              ),
+                                              label: const Text("Teklif Ver"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    AppColors.primary,
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 8,
+                                                    ),
+                                              ),
+                                            )
+                                          else
+                                            Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 8,
+                                                    horizontal: 12,
+                                                    vertical: 6,
                                                   ),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.grey200,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                req.status.label,
+                                                style: AppStyles.caption
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
                                             ),
-                                          ),
                                         ],
                                       ),
                                     ],
