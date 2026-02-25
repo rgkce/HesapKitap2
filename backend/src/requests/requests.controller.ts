@@ -21,35 +21,59 @@ import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from '../roles/roles.guard';
 import { Roles } from '../roles/roles.decorator';
 
+/**
+ * RequestsController
+ * Satın alma talepleri ile ilgili HTTP endpointlerini yönetir
+ */
 @Controller('requests')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(AuthGuard, RolesGuard) // Yetki ve kimlik doğrulama kontrolleri
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
+  /**
+   * Tüm talepleri listeler (filtreli veya tümü)
+   * Sadece approver, customer_approver ve supplier erişebilir
+   */
   @Get()
   @Roles('approver', 'customer_approver', 'supplier')
   getAllRequests(@Query() filters: RequestFilterDto) {
     return this.requestsService.findAll(filters);
   }
 
+  /**
+   * Giriş yapan kullanıcının oluşturduğu talepleri getirir
+   * Sadece customer rolü erişebilir
+   */
   @Get('my')
   @Roles('customer')
   getMyRequests(@Req() req) {
     return this.requestsService.findByUser(req.user.id);
   }
 
+  /**
+   * Belirli bir talebin detayını döner
+   * Tüm roller erişebilir
+   */
   @Get(':id')
   @Roles('customer', 'approver', 'customer_approver', 'supplier')
   getRequestById(@Param('id') id: number) {
     return this.requestsService.findById(Number(id));
   }
 
+  /**
+   * Yeni talep oluşturur
+   * Sadece customer rolü erişebilir
+   */
   @Post()
   @Roles('customer')
   createRequest(@Body() dto: CreateRequestDto, @Req() req) {
     return this.requestsService.create(dto, req.user);
   }
 
+  /**
+   * Var olan talebi günceller
+   * Sadece talebi oluşturan customer erişebilir
+   */
   @Patch(':id')
   @Roles('customer')
   updateRequest(
@@ -60,12 +84,20 @@ export class RequestsController {
     return this.requestsService.update(Number(id), dto, req.user);
   }
 
+  /**
+   * Talebi onaylar
+   * Sadece approver ve customer_approver erişebilir
+   */
   @Post(':id/approve')
   @Roles('approver', 'customer_approver')
   approveRequest(@Param('id') id: number, @Req() req) {
     return this.requestsService.approve(Number(id), req.user);
   }
 
+  /**
+   * Talebi reddeder ve gerekçesini kaydeder
+   * Sadece approver ve customer_approver erişebilir
+   */
   @Post(':id/reject')
   @Roles('approver', 'customer_approver')
   rejectRequest(
@@ -76,12 +108,20 @@ export class RequestsController {
     return this.requestsService.reject(Number(id), req.user, dto.reason);
   }
 
+  /**
+   * Talebi iptal eder
+   * Customer, approver ve customer_approver erişebilir
+   */
   @Post(':id/cancel')
   @Roles('customer', 'approver', 'customer_approver')
   cancelRequest(@Param('id') id: number, @Req() req) {
     return this.requestsService.cancel(Number(id), req.user);
   }
 
+  /**
+   * Talebin onay geçmişini döner (workflow geçmişi)
+   * Customer, approver ve customer_approver erişebilir
+   */
   @Get(':id/history')
   @Roles('customer', 'approver', 'customer_approver')
   getRequestHistory(@Param('id') id: number) {
