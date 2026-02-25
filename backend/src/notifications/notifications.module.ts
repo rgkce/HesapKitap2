@@ -14,27 +14,43 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { SocketModule } from '../socket/socket.module';
 
 @Module({
+  // =====================================================
+  // 1) Modülün importları
+  // =====================================================
   imports: [
     // NotificationEntity'yi TypeORM'a tanıtıyoruz
     TypeOrmModule.forFeature([NotificationEntity]),
 
-    // Kullanıcı bilgileri için
+    // Kullanıcı bilgilerini almak için UsersModule
     UsersModule,
 
-    // E-posta gönderimi için
+    // E-posta göndermek için MailerModule
     MailerModule,
 
-    // WebSocket bildirimleri için
+    // WebSocket bildirimleri için SocketModule
     SocketModule,
   ],
+
+  // =====================================================
+  // 2) Controller
+  // =====================================================
   controllers: [NotificationsController],
+  // NotificationsController → endpointleri yönetir (HTTP istekleri)
+
+  // =====================================================
+  // 3) Provider’lar
+  // =====================================================
   providers: [
-    NotificationsService,
-    NotificationGateway,
-    EmailService,
+    NotificationsService,  // Bildirimlerin iş mantığını yönetir
+    NotificationGateway,   // WebSocket üzerinden gerçek zamanlı bildirim gönderir
+    EmailService,          // E-posta gönderim servisidir
   ],
+
+  // =====================================================
+  // 4) Export edilenler
+  // =====================================================
   exports: [
-    NotificationsService, // Diğer modüller de bu servisi kullanabilsin
+    NotificationsService, // Diğer modüller NotificationsService'i kullanabilir
   ],
 })
 export class NotificationsModule {}

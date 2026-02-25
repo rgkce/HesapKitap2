@@ -8,26 +8,31 @@ import { Server, Socket } from 'socket.io';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-@WebSocketGateway({  //Frontend’ten bağlantıya izin verir.
+@WebSocketGateway({  // Bu decorator ile WebSocket gateway oluşturulur
   cors: {
-    origin: '*',
+    origin: '*',      // Herhangi bir frontend URL’sinden gelen bağlantıya izin verir
   },
 })
-@Injectable()
+@Injectable()         // Servis olarak diğer sınıflara inject edilebilir
 export class NotificationGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
-  server: Server;
+  server: Server;     // Socket.io server instance’ı, client’lara mesaj göndermek için kullanılır
 
   private connectedUsers: Record<number, string> = {};
+  // Kullanıcı ID → Socket ID eşleştirmesi
+  // Örn: { 15: 'socketId12345' }
 
   constructor(private readonly jwtService: JwtService) {}
+  // JWT doğrulaması için NestJS JwtService inject edilir
 
-
-  // Kullanıcı socket'e bağlandığında: JWT doğrulama
+  // =====================================================
+  // 1) Kullanıcı socket'e bağlandığında: JWT doğrulama
+  // =====================================================
   async handleConnection(client: Socket) {
     try {
+      // Token farklı yerlerden alınabilir: auth objesi, header veya query param
       const token =
         client.handshake.auth?.token ||
         client.handshake.headers?.token ||
@@ -35,7 +40,7 @@ export class NotificationGateway
 
       if (!token) {
         console.log('❌ Token yok → bağlantı reddedildi.');
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(); // Token yoksa bağlantıyı reddet
       }
 
       // JWT doğrulama
@@ -45,49 +50,61 @@ export class NotificationGateway
 
       if (!payload || !payload.sub) {
         console.log('❌ Geçersiz token payload');
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(); // Token geçersizse bağlantıyı reddet
       }
 
-      const userId = payload.sub;
+      const userId = payload.sub; // JWT payload’dan kullanıcı ID’sini al
 
-      // eşleştirme kaydı
+      // Kullanıcı ID ile socket ID eşleştirmesini kaydet
       this.connectedUsers[userId] = client.id;
 
-      (client as any).userId = userId; // disconnect'te kullanabilmek için client'a set ediyoruz
+      (client as any).userId = userId; 
+      // Disconnect sırasında kullanmak için client objesine userId ekliyoruz
 
       console.log(`🔌 Kullanıcı bağlandı → userId: ${userId}, socket: ${client.id}`);
     } catch (err) {
-      client.disconnect();
+      client.disconnect(); 
+      // Hata olursa socket’i kapat
     }
   }
 
-  // Kullanıcı ayrıldığında socket eşleşmesini sil
+  // =====================================================
+  // 2) Kullanıcı ayrıldığında: socket eşleşmesini sil
+  // =====================================================
   handleDisconnect(client: Socket) {
-    const userId = (client as any).userId;
+    const userId = (client as any).userId; // client objesinden userId al
 
     if (userId) {
-      delete this.connectedUsers[userId];
+      delete this.connectedUsers[userId]; 
+      // Bağlantı koptuğu için eşleşmeyi temizle
       console.log(`❌ Kullanıcı ayrıldı → userId: ${userId}`);
     }
   }
 
-  // Belirli kullanıcıya bildirim gönder
+  // =====================================================
+  // 3) Belirli kullanıcıya bildirim gönder
+  // =====================================================
   sendNotificationToUser(userId: number, data: any) {
-    const socketId = this.connectedUsers[userId];
+    const socketId = this.connectedUsers[userId]; 
+    // Kullanıcının socket ID’sini bul
 
     if (!socketId) {
       console.log(`⚠ Kullanıcı çevrimdışı → userId: ${userId}`);
-      return;
+      return; // Kullanıcı online değilse gönderme
     }
 
-    this.server.to(socketId).emit('notification', data);
+    this.server.to(socketId).emit('notification', data); 
+    // Socket.io ile bildirimi ilgili kullanıcıya gönder
   }
 
-  // Belirli role sahip tüm kullanıcılara gönder
+  // =====================================================
+  // 4) Belirli role sahip tüm kullanıcılara bildirim gönder
+  // =====================================================
   broadcastToRole(role: string, data: any) {
     for (const [userIdStr, socketId] of Object.entries(this.connectedUsers)) {
-      // Burada user rolünü DB'den kontrol edebilirsin
-      this.server.to(socketId).emit('notification', data);
+      // Bu örnekte role kontrolü yapılmıyor, ama production’da DB’den user rolü kontrol edilmeli
+      this.server.to(socketId).emit('notification', data); 
+      // Her socket’e broadcast et
     }
   }
 }
