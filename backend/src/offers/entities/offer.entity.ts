@@ -7,14 +7,15 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { RequestEntity } from '../../requests/entities/request.entity';
-import { UserEntity } from '../../users/entities/user.entity';
+import { RequestEntity } from '../../requests/entities/request.entity'; // Talep entity'si
+import { UserEntity } from '../../users/entities/user.entity'; // Kullanıcı entity'si (supplier)
 
+// Teklif tablosu
 @Entity('offers')
 export class OfferEntity {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number; // Teklifin benzersiz ID'si (otomatik artan)
 
   // Teklifin bağlı olduğu talep
   @ManyToOne(() => RequestEntity, (request) => request.offers)
@@ -24,35 +25,35 @@ export class OfferEntity {
   @ManyToOne(() => UserEntity)
   supplier: UserEntity;
 
-  // Fiyat bilgisi
+  // Teklif fiyatı
   @Column('decimal')
   price: number;
 
-  // Para birimi
+  // Para birimi (örn: USD, EUR, TRY)
   @Column()
   currency: string;
 
-  // Teslim süresi (gün)
+  // Teslim süresi (gün cinsinden)
   @Column('int')
   deliveryDays: number;
 
-  // Açıklama (opsiyonel)
+  // Teklif açıklaması (opsiyonel)
   @Column('text', { nullable: true })
   description: string;
 
-  // Teklif durumu
+  // Teklif durumu: pending, accepted, rejected
   @Column({ default: 'pending' })
   status: 'pending' | 'accepted' | 'rejected';
 
-  // Karşılaştırma skoru
+  // Teklifin karşılaştırma skoru (opsiyonel, karşılaştırma sonrası doldurulur)
   @Column({ nullable: true })
   score: number;
 
-  // Oluşturulma tarihi
+  // Teklifin oluşturulma tarihi (DB tarafından otomatik doldurulur)
   @CreateDateColumn()
   createdAt: Date;
 
-  // Güncellenme tarihi
+  // Teklifin güncellenme tarihi (DB tarafından otomatik doldurulur)
   @UpdateDateColumn()
   updatedAt: Date;
 }
