@@ -12,18 +12,24 @@ import { RequestsModule } from '../requests/requests.module';
 import { SuppliersModule } from '../suppliers/suppliers.module';
 import { UsersModule } from '../users/users.module';
 
+// ReportsModule: Raporlama modülü
+// Burada gerekli entity’ler, controller ve service tanımlanıyor
 @Module({
   imports: [
+    // TypeOrmModule ile bu entity’leri repository olarak kullanabiliriz
     TypeOrmModule.forFeature([
-      RequestEntity,
-      OfferEntity,
-      UserEntity,
+      RequestEntity, // Talep tablosu
+      OfferEntity,   // Teklif tablosu
+      UserEntity,    // Kullanıcı tablosu
     ]),
-    RequestsModule,
-    SuppliersModule,
-    UsersModule,
+    // İhtiyaç duyulan diğer modüller import ediliyor
+    RequestsModule,   // Taleplerle ilgili modül
+    SuppliersModule,  // Tedarikçilerle ilgili modül
+    UsersModule,      // Kullanıcılarla ilgili modül
   ],
+  // Bu modülün controller’ı
   controllers: [ReportsController],
+  // Bu modülün servisleri
   providers: [ReportsService],
 })
 export class ReportsModule {}
