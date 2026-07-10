@@ -4,11 +4,11 @@ import { Repository } from 'typeorm';
 
 import { RequestEntity } from '../requests/entities/request.entity';
 import { OfferEntity } from '../offers/entities/offer.entity';
-import { UserEntity } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 
 import { ReportFilterDto } from './dto/report-filter.dto';
 
-import * as PDFDocument from 'pdfkit'; // PDF oluşturmak için kütüphane
+import PDFDocument from 'pdfkit'; // PDF oluşturmak için kütüphane
 import * as ExcelJS from 'exceljs';    // Excel oluşturmak için kütüphane
 
 @Injectable()
@@ -21,8 +21,8 @@ export class ReportsService {
     @InjectRepository(OfferEntity)
     private readonly offerRepository: Repository<OfferEntity>,     // Teklif verileri
 
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,       // Kullanıcı verileri
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,       // Kullanıcı verileri
   ) {}
 
   // 1️⃣ Talep özet raporu

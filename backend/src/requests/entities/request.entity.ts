@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { UserEntity } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 // Talep durumu tipleri
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -40,12 +40,12 @@ export class RequestEntity {
   status: RequestStatus;
 
   // Talebi oluşturan kullanıcı
-  @ManyToOne(() => UserEntity, user => user.requests)
-  createdBy: UserEntity;
+  @ManyToOne(() => User, user => user.requests)
+  createdBy: User;
 
   // Talebi onaylayan kullanıcı (varsa)
-  @ManyToOne(() => UserEntity, { nullable: true })
-  approvedBy: UserEntity;
+  @ManyToOne(() => User, { nullable: true })
+  approvedBy: User;
 
   // Talep reddedildiyse reddetme sebebi
   @Column({ nullable: true })

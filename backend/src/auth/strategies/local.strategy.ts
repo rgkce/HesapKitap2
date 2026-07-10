@@ -2,7 +2,7 @@ import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { UserEntity } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 // Kullanıcı login işlemi için kullanılan local strateji.
 // Email + password doğrulaması içindir.
@@ -16,7 +16,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
   // Kullanıcıyı doğrulayan fonksiyon.
   // Eğer email veya parola yanlışsa UnauthorizedException fırlatılır.
-  async validate(email: string, password: string): Promise<UserEntity> {
+  async validate(email: string, password: string): Promise<User> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');

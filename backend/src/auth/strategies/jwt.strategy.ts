@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // Token süresi dolduysa reddedilir.
       ignoreExpiration: false,
       // Token doğrulamak için kullanılan secret.
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET') as string,
     });
   }
 

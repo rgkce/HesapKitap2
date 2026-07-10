@@ -6,7 +6,7 @@ import { ReportsService } from './reports.service';
 
 import { RequestEntity } from '../requests/entities/request.entity';
 import { OfferEntity } from '../offers/entities/offer.entity';
-import { UserEntity } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 
 import { RequestsModule } from '../requests/requests.module';
 import { SuppliersModule } from '../suppliers/suppliers.module';
@@ -20,7 +20,7 @@ import { UsersModule } from '../users/users.module';
     TypeOrmModule.forFeature([
       RequestEntity, // Talep tablosu
       OfferEntity,   // Teklif tablosu
-      UserEntity,    // Kullanıcı tablosu
+      User,    // Kullanıcı tablosu
     ]),
     // İhtiyaç duyulan diğer modüller import ediliyor
     RequestsModule,   // Taleplerle ilgili modül

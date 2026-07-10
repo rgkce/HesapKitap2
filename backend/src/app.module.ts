@@ -9,7 +9,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 
 import { RequestEntity } from './requests/entities/request.entity';
 import { RequestWorkflowEntity } from './requests/entities/request-workflow.entity';
-import { UserEntity } from './users/entities/user.entity';
+import { User } from './users/entities/user.entity';
 
 /**
  * AppModule
@@ -30,7 +30,7 @@ import { UserEntity } from './users/entities/user.entity';
       entities: [             // Veritabanında kullanılacak entity’ler
         RequestEntity,
         RequestWorkflowEntity,
-        UserEntity,
+        User,
       ],
       synchronize: true,      // Entity değişikliklerini otomatik senkronize eder (prod’da dikkat!)
     }),

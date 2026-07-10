@@ -21,7 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         // JWT token imzalama için kullanılan secret.
         secret: config.get<string>('JWT_SECRET'),
         // Token süresi config'ten alınır, yoksa varsayılan 15 dakika.
-        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m') },
+        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m') } as string,
       }),
     }),
     UsersModule, // Kullanıcı işlemleri AuthService tarafından kullanılacağı için import edilir.

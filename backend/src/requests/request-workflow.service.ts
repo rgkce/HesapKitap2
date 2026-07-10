@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { RequestWorkflowEntity } from './entities/request-workflow.entity';
 import { RequestEntity } from './entities/request.entity';
-import { UserEntity } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class RequestWorkflowService {
@@ -21,9 +21,9 @@ export class RequestWorkflowService {
   /**
    * Yeni bir workflow başlatır (talep için onay sırası oluşturur)
    * @param requestId Talep ID'si
-   * @param approvers Onaycılar (UserEntity dizisi veya ID dizisi)
+   * @param approvers Onaycılar (User dizisi veya ID dizisi)
    */
-  async initWorkflow(requestId: number, approvers: UserEntity[] | number[]) {
+  async initWorkflow(requestId: number, approvers: User[] | number[]) {
     // Talebi veritabanından bul
     const request = await this.requestRepository.findOne({
       where: { id: requestId },
@@ -36,8 +36,8 @@ export class RequestWorkflowService {
     for (const approver of approvers) {
       const workflow = this.workflowRepository.create({
         request,
-        // approver bir sayı ise UserEntity tipine cast et
-        approver: typeof approver === 'number' ? ({ id: approver } as UserEntity) : approver,
+        // approver bir sayı ise User tipine cast et
+        approver: typeof approver === 'number' ? ({ id: approver } as User) : approver,
         status: 'pending', // Başlangıç durumu pending
       });
 

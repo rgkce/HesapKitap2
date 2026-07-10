@@ -1,37 +1,58 @@
-// User Entity: Veritabanındaki 'users' tablosunu temsil eden yapı
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { Role } from '../../roles/entities/role.entity';
+import { NotificationEntity } from '../../notifications/entities/notification.entity';
+import { ReportLogEntity } from '../../reports/entities/report-log.entity';
 
-@Entity('users') // Tablo adı
+@Entity('users')
 export class User {
-  // Benzersiz kullanıcı ID’si (UUID otomatik üretilir)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Kullanıcı e-posta adresi – benzersiz constraint içerir
   @Column({ unique: true })
   email: string;
 
-  // Kullanıcının hashlenmiş şifresi
   @Column()
   password: string;
 
-  // Kullanıcının tam adı
   @Column()
   fullName: string;
 
-  // Opsiyonel telefon numarası – null olabilir
   @Column({ nullable: true })
   phoneNumber?: string;
 
-  // Kullanıcının aktif olup olmadığı – default: true
+  // auth.service.ts bunu okuyor (getTokens'a payload olarak veriyor)
+  @Column({ default: 'user' })
+  role: string;
+
+  // logout / refresh token akışında null'a set edilebiliyor
+  @Column({ type: 'varchar', nullable: true })
+  refreshToken: string | null;
+
   @Column({ default: true })
   isActive: boolean;
 
-  // Kaydın oluşturulma tarihi otomatik generate edilir
   @CreateDateColumn()
   createdAt: Date;
 
-  // Kaydın güncellenme tarihi otomatik generate edilir
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable() // sadece owning side'da (Role tarafında @JoinTable OLMAMALI)
+  roles: Role[];
+
+  @OneToMany(() => NotificationEntity, (n) => n.user)
+  notifications: NotificationEntity[];
+
+  @OneToMany(() => ReportLogEntity, (r) => r.user)
+  reportLogs: ReportLogEntity[];
 }

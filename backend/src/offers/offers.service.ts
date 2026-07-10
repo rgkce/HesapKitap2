@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { OfferEntity } from './entities/offer.entity'; // Teklif entity'si
 import { RequestEntity } from '../requests/entities/request.entity'; // Talep entity'si
-import { UserEntity } from '../users/entities/user.entity'; // Kullanıcı entity'si
+import { User } from '../users/entities/user.entity'; // Kullanıcı entity'si
 
 import { CreateOfferDto } from './dto/create-offer.dto'; // Teklif oluşturma DTO'su
 import { UpdateOfferDto } from './dto/update-offer.dto'; // Teklif güncelleme DTO'su
@@ -57,7 +57,7 @@ export class OffersService {
   }
 
   // Yeni teklif oluştur (supplier tarafından)
-  async create(dto: CreateOfferDto, supplier: UserEntity) {
+  async create(dto: CreateOfferDto, supplier: User) {
     // Teklifin ait olduğu talebi bul
     const request = await this.requestRepository.findOne({
       where: { id: dto.requestId },
@@ -88,7 +88,7 @@ export class OffersService {
   }
 
   // Teklif güncelle
-  async update(id: number, dto: UpdateOfferDto, supplier: UserEntity) {
+  async update(id: number, dto: UpdateOfferDto, supplier: User) {
     const offer = await this.offerRepository.findOne({
       where: { id },
       relations: ['supplier'], // Supplier ilişkisini al
@@ -105,7 +105,7 @@ export class OffersService {
   }
 
   // Teklif silme
-  async remove(id: number, supplier: UserEntity) {
+  async remove(id: number, supplier: User) {
     const offer = await this.offerRepository.findOne({
       where: { id },
       relations: ['supplier'],
@@ -121,7 +121,7 @@ export class OffersService {
   }
 
   // Kazanan teklifi seç (approver tarafından)
-  async select(id: number, approver: UserEntity) {
+  async select(id: number, approver: User) {
     const offer = await this.offerRepository.findOne({
       where: { id },
       relations: ['request', 'supplier'], // Teklifin talep ve supplier ilişkisini al

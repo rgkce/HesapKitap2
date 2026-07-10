@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { RequestEntity } from './request.entity';
-import { UserEntity } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 // Workflow durumu tipleri
 export type WorkflowStatus = 'pending' | 'approved' | 'rejected';
@@ -29,8 +29,8 @@ export class RequestWorkflowEntity {
   request: RequestEntity;
 
   // Talebi onaylayan kullanıcı
-  @ManyToOne(() => UserEntity)
-  approver: UserEntity;
+  @ManyToOne(() => User)
+  approver: User;
 
   // Onay durumu (pending, approved, rejected)
   @Column({ default: 'pending' })

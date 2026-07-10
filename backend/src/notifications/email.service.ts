@@ -42,7 +42,7 @@ export class EmailService {
   // =====================================================
   // Her bildirim e-posta gerektirmediği için NotificationService içerisinden çağrılır.
   async sendNotificationEmail(
-    user: UserEntity, // Hedef kullanıcı
+    user: User, // Hedef kullanıcı
     message: string,  // Gönderilecek mesaj
   ): Promise<void> {
     if (!user?.email) {

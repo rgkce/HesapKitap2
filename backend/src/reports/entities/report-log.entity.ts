@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
-import { UserEntity } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 // report_logs tablosu: rapor üretim loglarını saklar
 @Entity('report_logs')
@@ -21,8 +21,9 @@ export class ReportLogEntity {
 
   // Raporu üreten kullanıcı ile ilişki
   // eager: true => log çekildiğinde user bilgisi otomatik gelir
-  @ManyToOne(() => UserEntity, (user) => user.reportLogs, { eager: true })
-  generatedBy: UserEntity;
+  @ManyToOne(() => User, (user) => user.reportLogs, { eager: true })
+  user: User;
+  generatedBy: User;
 
   // Raporun üretildiği tarih (otomatik doldurulur)
   @CreateDateColumn()

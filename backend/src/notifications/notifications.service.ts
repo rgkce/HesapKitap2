@@ -10,36 +10,26 @@ import { UsersService } from '../users/users.service';
 import { NotificationGateway } from './notification.gateway';
 import { EmailService } from './email.service';
 
-@Injectable() // Bu servis diğer sınıflara inject edilebilir
+@Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(NotificationEntity)
-    private readonly repo: Repository<NotificationEntity>, 
-    // NotificationEntity için TypeORM repository’si → DB işlemleri burada yapılır
-
-    private readonly usersService: UsersService, 
-    // Kullanıcı bilgilerine erişim için UsersService
-
-    private readonly emailService: EmailService, 
-    // E-posta gönderimi için EmailService
-
-    private readonly gateway: NotificationGateway, 
-    // WebSocket üzerinden gerçek zamanlı bildirim göndermek için gateway
+    private readonly repo: Repository<NotificationEntity>,
+    private readonly usersService: UsersService,
+    private readonly emailService: EmailService,
+    private readonly gateway: NotificationGateway,
   ) {}
 
   // =====================================================
   // 1) Bildirim oluştur
   // =====================================================
-  // DTO içindeki userId ile kullanıcı ile ilişki kurar
-  async createNotification(dto: CreateNotificationDto | TestNotificationDto) {
+  async createNotification(dto: (CreateNotificationDto | TestNotificationDto) & { userId: string }) {
     const notification = this.repo.create({
       ...dto,
-      user: { id: dto.userId } as any, 
-      // TypeORM relation için sadece id set ediliyor, diğer alanlara gerek yok
+      user: { id: dto.userId } as any,
     });
 
-    return this.repo.save(notification); 
-    // DB’ye kaydet ve kaydı geri döndür
+    return this.repo.save(notification);
   }
 
   // =====================================================
@@ -60,98 +50,111 @@ export class NotificationsService {
   // =====================================================
   async sendEmailNotification(notification: NotificationEntity) {
     const user = await this.usersService.findById(notification.user.id);
-    // Kullanıcı bilgilerini al
+    if (!user || !user.email) return;
 
-    if (!user || !user.email) return; 
-    // Kullanıcı yoksa veya e-posta adresi yoksa fonksiyondan çık
-
-    await this.emailService.sendNotificationEmail(
-      user,
-      notification.message, 
-      // E-posta servisine mesajı gönder
-    );
+    await this.emailService.sendNotificationEmail(user, notification.message);
   }
 
   // =====================================================
   // 4) Genel bildirim fonksiyonu (hem DB, hem in-app, hem email)
   // =====================================================
-  async notifyUser(userId: number, dto: CreateNotificationDto) {
-    // 1. DB kaydı
+  async notifyUser(userId: string, dto: CreateNotificationDto) {
     const notification = await this.createNotification({
       ...dto,
       userId,
     });
 
-    // 2. In-app bildirim gönder
     if (dto.channel === 'in_app' || dto.channel === 'both') {
       await this.sendInAppNotification(notification);
     }
 
-    // 3. E-posta gönder
     if (dto.channel === 'email' || dto.channel === 'both') {
       await this.sendEmailNotification(notification);
     }
 
-    return notification; 
-    // Oluşturulan bildirimi döndür
+    return notification;
+  }
+
+  // =====================================================
+  // 4b) Yardımcı metodlar — offers/requests servislerinin çağırdığı isimler
+  // =====================================================
+  async notifyApprover(userId: string, title: string, message: string) {
+    return this.notifyUser(userId, {
+      title,
+      message,
+      channel: 'both',
+    } as CreateNotificationDto);
+  }
+
+  async notifySupplier(userId: string, title: string, message: string) {
+    return this.notifyUser(userId, {
+      title,
+      message,
+      channel: 'both',
+    } as CreateNotificationDto);
+  }
+
+  async notifyApprovers(userIds: string[], requestId: string) {
+    return Promise.all(
+      userIds.map((userId) =>
+        this.notifyUser(userId, {
+          title: 'Yeni onay talebi',
+          message: `#${requestId} numaralı talep onayınızı bekliyor.`,
+          channel: 'both',
+        } as CreateNotificationDto),
+      ),
+    );
   }
 
   // =====================================================
   // 5) Kullanıcının tüm bildirimlerini getir
   // =====================================================
-  async getUserNotifications(userId: number) {
+  async getUserNotifications(userId: string) {
     return this.repo.find({
       where: { user: { id: userId } },
-      order: { createdAt: 'DESC' }, 
-      // Yeni bildirimler önce gelsin
+      order: { createdAt: 'DESC' },
     });
   }
 
   // =====================================================
   // 6) Bildirimi okundu olarak işaretle
   // =====================================================
-  async markAsRead(id: number, userId: number) {
+  async markAsRead(id: string, userId: string) {
     const notification = await this.repo.findOne({
       where: { id },
-      relations: ['user'], 
-      // User relation’ını al → yetki kontrolü için
+      relations: ['user'],
     });
 
     if (!notification || notification.user.id !== userId) {
-      // Kullanıcı bu bildirime erişemezse
       throw new ForbiddenException('Bu bildirime erişemezsiniz.');
     }
 
-    notification.read = true; 
-    return this.repo.save(notification); 
-    // Güncelle ve geri döndür
+    notification.isRead = true; // 'read' değil, entity'deki gerçek alan adı
+    return this.repo.save(notification);
   }
 
   // =====================================================
   // 7) Bildirimi sil
   // =====================================================
-  async delete(id: number, userId: number) {
+  async delete(id: string, userId: string) {
     const notification = await this.repo.findOne({
       where: { id },
-      relations: ['user'], 
-      // User relation’ı ile yetki kontrolü yapılır
+      relations: ['user'],
     });
 
     if (!notification || notification.user.id !== userId) {
       throw new ForbiddenException('Bu bildirime erişemezsiniz.');
     }
 
-    return this.repo.remove(notification); 
-    // Bildirimi DB’den sil
+    return this.repo.remove(notification);
   }
 
   // =====================================================
   // 8) Tüm bildirimleri temizle
   // =====================================================
-  async clearAll(userId: number) {
+  async clearAll(userId: string) {
     return this.repo.delete({
-      user: { id: userId }, 
-      // Kullanıcının tüm bildirimlerini sil
+      user: { id: userId },
     });
   }
 }

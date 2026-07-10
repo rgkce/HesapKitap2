@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { RequestEntity } from '../../requests/entities/request.entity'; // Talep entity'si
-import { UserEntity } from '../../users/entities/user.entity'; // Kullanıcı entity'si (supplier)
+import { User } from '../../users/entities/user.entity'; // Kullanıcı entity'si (supplier)
 
 // Teklif tablosu
 @Entity('offers')
@@ -22,8 +22,8 @@ export class OfferEntity {
   request: RequestEntity;
 
   // Teklifi veren supplier
-  @ManyToOne(() => UserEntity)
-  supplier: UserEntity;
+  @ManyToOne(() => User)
+  supplier: User;
 
   // Teklif fiyatı
   @Column('decimal')

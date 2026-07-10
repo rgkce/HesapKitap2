@@ -9,7 +9,7 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import { RequestFilterDto } from './dto/request-filter.dto';
 
-import { UserEntity } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 
 import { RequestWorkflowService } from './request-workflow.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -88,7 +88,7 @@ export class RequestsService {
    * Yeni talep oluşturur
    * Workflow başlatır ve onaycılara bildirim gönderir
    */
-  async create(dto: CreateRequestDto, user: UserEntity) {
+  async create(dto: CreateRequestDto, user: User) {
     const request = this.requestRepository.create({
       title: dto.title,
       description: dto.description,
@@ -111,7 +111,7 @@ export class RequestsService {
    * Var olan talebi günceller
    * Sadece talebi oluşturan kullanıcı güncelleyebilir
    */
-  async update(id: number, dto: UpdateRequestDto, user: UserEntity) {
+  async update(id: number, dto: UpdateRequestDto, user: User) {
     const request = await this.findById(id);
 
     if (request.createdBy.id !== user.id) {
@@ -127,7 +127,7 @@ export class RequestsService {
    * Workflow güncellenir ve talep durumu approved olur
    * Oluşturan kullanıcıya bildirim gönderilir
    */
-  async approve(id: number, approver: UserEntity) {
+  async approve(id: number, approver: User) {
     const request = await this.findById(id);
 
     if (request.status !== 'pending') {
@@ -154,7 +154,7 @@ export class RequestsService {
    * Workflow güncellenir ve talep durumu rejected olur
    * Reddetme sebebi kaydedilir ve bildirim gönderilir
    */
-  async reject(id: number, approver: UserEntity, reason: string) {
+  async reject(id: number, approver: User, reason: string) {
     const request = await this.findById(id);
 
     if (request.status !== 'pending') {
@@ -181,7 +181,7 @@ export class RequestsService {
    * Talebi iptal eder
    * Sadece talebi oluşturan veya approver rolündeki kullanıcı iptal edebilir
    */
-  async cancel(id: number, user: UserEntity) {
+  async cancel(id: number, user: User) {
     const request = await this.findById(id);
 
     if (request.createdBy.id !== user.id && user.role !== 'approver') {
