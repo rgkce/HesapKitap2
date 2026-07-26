@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { RequestEntity } from './entities/request.entity';
+import { RequestWorkflowEntity } from './entities/request-workflow.entity';
 
 import { RequestsController } from './requests.controller';
 import { RequestsService } from './requests.service';
@@ -19,7 +20,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 @Module({
   imports: [
     // RequestEntity için TypeORM repository'sini modüle dahil et
-    TypeOrmModule.forFeature([RequestEntity]),
+    TypeOrmModule.forFeature([RequestEntity, RequestWorkflowEntity]),
     // Kullanıcı bilgileri için UsersModule
     UsersModule,
     // Roller ve yetki kontrolü için RolesModule

@@ -143,7 +143,7 @@ export class ReportsService {
     // Her talep için onay süresini hesapla
     requests.forEach((req) => {
       const created = new Date(req.createdAt).getTime();
-      const approved = new Date(req.approvedAt).getTime();
+      const approved = new Date(req.updatedAt).getTime();
       totalDuration += approved - created; // MS cinsinden fark
     });
 

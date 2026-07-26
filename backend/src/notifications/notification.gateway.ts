@@ -20,7 +20,7 @@ export class NotificationGateway
   @WebSocketServer()
   server: Server;     // Socket.io server instance’ı, client’lara mesaj göndermek için kullanılır
 
-  private connectedUsers: Record<number, string> = {};
+  private connectedUsers: Record<string, string> = {};
   // Kullanıcı ID → Socket ID eşleştirmesi
   // Örn: { 15: 'socketId12345' }
 
@@ -84,7 +84,7 @@ export class NotificationGateway
   // =====================================================
   // 3) Belirli kullanıcıya bildirim gönder
   // =====================================================
-  sendNotificationToUser(userId: number, data: any) {
+  sendNotificationToUser(userId: string, data: any) {
     const socketId = this.connectedUsers[userId]; 
     // Kullanıcının socket ID’sini bul
 

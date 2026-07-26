@@ -11,6 +11,7 @@ import {
 import { Role } from '../../roles/entities/role.entity';
 import { NotificationEntity } from '../../notifications/entities/notification.entity';
 import { ReportLogEntity } from '../../reports/entities/report-log.entity';
+import { RequestEntity } from '../../requests/entities/request.entity';
 
 @Entity('users')
 export class User {
@@ -53,6 +54,10 @@ export class User {
   @OneToMany(() => NotificationEntity, (n) => n.user)
   notifications: NotificationEntity[];
 
+  @OneToMany(() => RequestEntity, (r) => r.createdBy)
+  requests: RequestEntity[];
+
   @OneToMany(() => ReportLogEntity, (r) => r.user)
   reportLogs: ReportLogEntity[];
 }
+

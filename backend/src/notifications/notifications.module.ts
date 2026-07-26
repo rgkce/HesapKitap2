@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 
 import { NotificationEntity } from './entities/notification.entity';
 
@@ -11,7 +12,6 @@ import { EmailService } from './email.service';
 // Dış modüller
 import { UsersModule } from '../users/users.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { SocketModule } from '../socket/socket.module';
 
 @Module({
   // =====================================================
@@ -25,10 +25,9 @@ import { SocketModule } from '../socket/socket.module';
     UsersModule,
 
     // E-posta göndermek için MailerModule
-    MailerModule,
+    //MailerModule,
 
-    // WebSocket bildirimleri için SocketModule
-    SocketModule,
+    JwtModule,
   ],
 
   // =====================================================
@@ -54,3 +53,5 @@ import { SocketModule } from '../socket/socket.module';
   ],
 })
 export class NotificationsModule {}
+
+

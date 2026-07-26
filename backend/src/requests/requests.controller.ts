@@ -17,16 +17,16 @@ import { UpdateRequestDto } from './dto/update-request.dto';
 import { RejectReasonDto } from './dto/reject-reason.dto';
 import { RequestFilterDto } from './dto/request-filter.dto';
 
-import { AuthGuard } from '../auth/auth.guard';
-import { RolesGuard } from '../roles/roles.guard';
-import { Roles } from '../roles/roles.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 /**
  * RequestsController
  * Satın alma talepleri ile ilgili HTTP endpointlerini yönetir
  */
 @Controller('requests')
-@UseGuards(AuthGuard, RolesGuard) // Yetki ve kimlik doğrulama kontrolleri
+@UseGuards(JwtAuthGuard, RolesGuard) // Yetki ve kimlik doğrulama kontrolleri
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 

@@ -5,9 +5,11 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 import { User } from '../../users/entities/user.entity';
+import { OfferEntity } from '../../offers/entities/offer.entity';
 
 // Talep durumu tipleri
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -58,4 +60,8 @@ export class RequestEntity {
   // Güncellenme zamanı otomatik olarak kaydedilir
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => OfferEntity, (offer) => offer.request)
+  offers: OfferEntity[];
 }
+

@@ -23,5 +23,5 @@ export class CreateRequestDto {
   // Talebin onaycıları, boş bir dizi olamaz
   @IsArray()
   @ArrayNotEmpty()
-  approvers: number[];
+  approvers: string[];
 }

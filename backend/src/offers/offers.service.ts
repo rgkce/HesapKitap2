@@ -80,8 +80,9 @@ export class OffersService {
 
     // Onaylayıcıya bildirim gönder
     await this.notificationsService.notifyApprover(
-      request.id,
+      String(request.createdBy?.id ?? request.id),
       'New offer submitted',
+      `A new offer was submitted for request #${request.id}`,
     );
 
     return savedOffer; // Kaydedilen teklifi döndür
@@ -134,13 +135,14 @@ export class OffersService {
 
     // Talep durumunu "offer_selected" olarak güncelle
     await this.requestRepository.update(offer.request.id, {
-      status: 'offer_selected',
+      status: 'approved' as any,
     });
 
     // Supplier'a bildirim gönder
     await this.notificationsService.notifySupplier(
       offer.supplier.id,
       'Your offer has been selected',
+      `Your offer for request #${offer.request.id} has been selected`,
     );
 
     return offer; // Seçilen teklifi döndür

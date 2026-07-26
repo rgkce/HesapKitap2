@@ -17,12 +17,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        // JWT token imzalama için kullanılan secret.
-        secret: config.get<string>('JWT_SECRET'),
-        // Token süresi config'ten alınır, yoksa varsayılan 15 dakika.
-        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m') } as string,
-      }),
+      useFactory: (config: ConfigService) => {
+        const secret = config.get<string>('JWT_SECRET') ?? 'supersecretkey123';
+        console.log('JWT_SECRET:', secret);
+        return {
+          secret,
+          signOptions: { expiresIn: '15m' as any },  // ← as any ekle
+        };
+      },
     }),
     UsersModule, // Kullanıcı işlemleri AuthService tarafından kullanılacağı için import edilir.
   ],
@@ -31,3 +33,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   exports: [AuthService], // Diğer modüllerde AuthService'in kullanılabilmesi için export edilir.
 })
 export class AuthModule {}
+

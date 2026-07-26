@@ -23,7 +23,7 @@ export class RequestWorkflowService {
    * @param requestId Talep ID'si
    * @param approvers Onaycılar (User dizisi veya ID dizisi)
    */
-  async initWorkflow(requestId: number, approvers: User[] | number[]) {
+  async initWorkflow(requestId: number, approvers: User[] | string[]) {
     // Talebi veritabanından bul
     const request = await this.requestRepository.findOne({
       where: { id: requestId },
@@ -37,7 +37,7 @@ export class RequestWorkflowService {
       const workflow = this.workflowRepository.create({
         request,
         // approver bir sayı ise User tipine cast et
-        approver: typeof approver === 'number' ? ({ id: approver } as User) : approver,
+        approver: typeof approver === 'string' ? ({ id: approver } as unknown as User) : approver,
         status: 'pending', // Başlangıç durumu pending
       });
 
@@ -53,7 +53,7 @@ export class RequestWorkflowService {
    * @param requestId Talep ID'si
    * @param approverId Onaycı ID'si
    */
-  async markApproved(requestId: number, approverId: number) {
+  async markApproved(requestId: number, approverId: string) {
     // İlgili workflow kaydını bul
     const workflow = await this.workflowRepository.findOne({
       where: {
@@ -81,7 +81,7 @@ export class RequestWorkflowService {
    * @param approverId Onaycı ID'si
    * @param reason Reddetme nedeni
    */
-  async markRejected(requestId: number, approverId: number, reason: string) {
+  async markRejected(requestId: number, approverId: string, reason: string) {
     // İlgili workflow kaydını bul
     const workflow = await this.workflowRepository.findOne({
       where: {

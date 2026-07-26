@@ -77,7 +77,7 @@ export class RequestsService {
   /**
    * Belirli bir kullanıcıya ait talepleri getirir
    */
-  async findByUser(userId: number) {
+  async findByUser(userId: string) {
     return this.requestRepository.find({
       where: { createdBy: { id: userId } },
       relations: ['createdBy', 'approvedBy'],
@@ -102,7 +102,7 @@ export class RequestsService {
     // Workflow başlat
     await this.workflowService.initWorkflow(savedRequest.id, dto.approvers);
     // Onaycılara bildirim gönder
-    await this.notificationsService.notifyApprovers(dto.approvers, savedRequest.id);
+    await this.notificationsService.notifyApprovers(dto.approvers, String(savedRequest.id));
 
     return savedRequest;
   }
@@ -141,10 +141,11 @@ export class RequestsService {
 
     const saved = await this.requestRepository.save(request);
 
-    await this.notificationsService.notifyUser(
-      request.createdBy.id,
-      `Your request #${request.id} has been approved`,
-    );
+    await this.notificationsService.notifyUser(request.createdBy.id, {
+      title: 'Talebiniz onayland�',
+      message: `Your request #${request.id} has been approved`,
+      channel: 'both',
+    } as any);
 
     return saved;
   }
@@ -169,10 +170,11 @@ export class RequestsService {
 
     const saved = await this.requestRepository.save(request);
 
-    await this.notificationsService.notifyUser(
-      request.createdBy.id,
-      `Your request #${request.id} was rejected. Reason: ${reason}`,
-    );
+    await this.notificationsService.notifyUser(request.createdBy.id, {
+      title: 'Talebiniz reddedildi',
+      message: `Your request #${request.id} was rejected. Reason: ${reason}`,
+      channel: 'both',
+    } as any);
 
     return saved;
   }
@@ -204,3 +206,4 @@ export class RequestsService {
     });
   }
 }
+
