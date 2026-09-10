@@ -1,6 +1,7 @@
 import 'package:hesapkitap/core/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:hesapkitap/core/services/api_service.dart';
 
 class UserService {
   // Singleton
@@ -14,7 +15,7 @@ class UserService {
       id: '1',
       name: 'Admin User',
       email: 'admin@example.com',
-      password: '123',
+      password: '12345678',
       role: UserRole.admin,
       companyId: 'COMP001',
     ),
@@ -58,21 +59,28 @@ class UserService {
       );
       _currentUser = user;
       await _saveToPrefs();
+      
+      // Arka planda backend API girişini de dene
+      await ApiService().attemptBackendLogin(email, password);
+      
       return user;
     } catch (e) {
       return null;
     }
   }
 
-  Future<bool> registerAdmin(
+  Future<String?> registerAdmin(
     String name,
     String email,
     String password,
     String companyId,
   ) async {
-    // Check if company ID exists (Mock check: only unique companies allowed?)
-    // For now, allow any new company ID, but only one admin per company on creation (simplified).
-    if (_users.any((u) => u.email == email)) return false;
+    if (_users.any((u) => u.companyId == companyId)) {
+      return "Bu şirket kodu kullanımda. Lütfen yöneticinizden sizi eklemesini isteyin.";
+    }
+    if (_users.any((u) => u.email == email)) {
+      return "Email zaten kullanılıyor.";
+    }
 
     final newUser = UserModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -85,14 +93,14 @@ class UserService {
     _users.add(newUser);
     _currentUser = newUser;
     await _saveToPrefs();
-    return true;
+    return null;
   }
 
   Future<String?> createUser(String name, String email, UserRole role) async {
     if (_currentUser?.role != UserRole.admin) return null;
 
     // Auto generate password
-    final password = "123"; // Simplified
+    final password = "12345678"; // Min 8 characters
 
     final newUser = UserModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -159,6 +167,7 @@ class UserService {
   Future<void> logout() async {
     _currentUser = null;
     await _removeFromPrefs();
+    ApiService().setToken(null);
   }
 
   void deleteUser(String id) {

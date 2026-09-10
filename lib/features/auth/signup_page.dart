@@ -40,9 +40,16 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
+    if (_passwordController.text.trim().length < 8) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Şifre en az 8 karakter olmalıdır.')));
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    final success = await UserService().registerAdmin(
+    final errorMsg = await UserService().registerAdmin(
       _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text.trim(),
@@ -51,14 +58,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
     setState(() => _isLoading = false);
 
-    if (success) {
+    if (errorMsg == null) {
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email zaten kullanılıyor')),
+          SnackBar(content: Text(errorMsg)),
         );
       }
     }

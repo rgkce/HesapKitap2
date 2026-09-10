@@ -25,14 +25,20 @@ class _ManagerCreateRequestPageState extends State<ManagerCreateRequestPage> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      final title =
-          "${_productController.text} - ${_quantityController.text} Adet";
-      final description = "Öncelik: $_priority\nNot: ${_noteController.text}";
+      final title = _productController.text;
+      final quantityStr = _quantityController.text;
+      final quantity = int.tryParse(quantityStr) ?? 1;
+      final description = _noteController.text;
 
       // Simulate network
       await Future.delayed(const Duration(seconds: 1));
 
-      final success = await RequestService().createRequest(title, description);
+      final success = await RequestService().createRequest(
+        title,
+        description,
+        quantity,
+        _priority,
+      );
 
       setState(() => _isLoading = false);
 

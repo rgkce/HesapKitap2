@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hesapkitap/core/theme/app_colors.dart';
 import 'package:hesapkitap/core/theme/app_styles.dart';
 import 'package:hesapkitap/features/navigation/manager_navbar.dart';
+import 'package:hesapkitap/core/services/request_service.dart';
+import 'package:hesapkitap/core/models/request_model.dart';
+import 'package:hesapkitap/core/services/api_service.dart';
 
 class ManagerReportsPage extends StatefulWidget {
   const ManagerReportsPage({super.key});
@@ -13,34 +16,102 @@ class ManagerReportsPage extends StatefulWidget {
 
 class _ManagerReportsPageState extends State<ManagerReportsPage> {
   String selectedFilter = "Son 7 gün";
+  bool _isLoading = true;
+  bool _isBackendData = false;
 
-  // Örnek veri
-  final List<FlSpot> profitData = [
-    const FlSpot(0, 200),
-    const FlSpot(1, 300),
-    const FlSpot(2, 250),
-    const FlSpot(3, 400),
-    const FlSpot(4, 350),
-    const FlSpot(5, 450),
-  ];
+  int _toplamTeklif = 0;
+  int _kabulEdilen = 0;
+  int _reddedilen = 0;
+  int _bekleyen = 0;
+  double _toplamGider = 0;
+  List<FlSpot> _lineSpots = [];
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
-  final List<FlSpot> expenseData = [
-    const FlSpot(0, 150),
-    const FlSpot(1, 200),
-    const FlSpot(2, 180),
-    const FlSpot(3, 220),
-    const FlSpot(4, 200),
-    const FlSpot(5, 250),
-  ];
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
 
-  final List<FlSpot> netProfitData = [
-    const FlSpot(0, 50),
-    const FlSpot(1, 100),
-    const FlSpot(2, 70),
-    const FlSpot(3, 180),
-    const FlSpot(4, 150),
-    const FlSpot(5, 200),
-  ];
+    // 1. Backend'den veri çekmeyi dene
+    final apiService = ApiService();
+    final summary = await apiService.fetchRequestSummary();
+    final spending = await apiService.fetchMonthlySpending();
+    final performance = await apiService.fetchSupplierPerformance();
+
+    if (summary != null && spending != null) {
+      setState(() {
+        _isBackendData = true;
+        
+        // Toplam Teklif sayısını tedarikçi performansından topla
+        if (performance != null) {
+          _toplamTeklif = performance.fold<int>(0, (sum, item) {
+            final approved = int.tryParse(item['approvedOffers']?.toString() ?? '0') ?? 0;
+            final rejected = int.tryParse(item['rejectedOffers']?.toString() ?? '0') ?? 0;
+            return sum + approved + rejected;
+          });
+        } else {
+          _toplamTeklif = 0;
+        }
+
+        _kabulEdilen = summary['approved'] ?? 0;
+        _reddedilen = summary['rejected'] ?? 0;
+        _bekleyen = summary['pending'] ?? 0;
+
+        double spendSum = 0;
+        for (var item in spending) {
+          final amt = item['totalAmount'];
+          spendSum += amt is num ? amt.toDouble() : double.tryParse(amt.toString()) ?? 0.0;
+        }
+        _toplamGider = spendSum;
+
+        // Line Chart spots
+        _lineSpots = [];
+        for (int i = 0; i < spending.length; i++) {
+          final amt = spending[i]['totalAmount'];
+          final double val = amt is num ? amt.toDouble() : double.tryParse(amt.toString()) ?? 0.0;
+          _lineSpots.add(FlSpot(i.toDouble(), val));
+        }
+        if (_lineSpots.isEmpty) {
+          _lineSpots = [const FlSpot(0, 0), const FlSpot(5, 0)];
+        }
+
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // 2. Fallback: Yerel mock veritabanı hesaplaması
+    final requests = RequestService().getRequests();
+    setState(() {
+      _isBackendData = false;
+      _toplamTeklif = requests.fold(0, (sum, r) => sum + r.offers.length);
+      _kabulEdilen = requests.where((r) => r.status == RequestStatus.approved || r.status == RequestStatus.ordered || r.status == RequestStatus.completed).length;
+      _reddedilen = requests.where((r) => r.status == RequestStatus.rejected).length;
+      _bekleyen = requests.where((r) => r.status == RequestStatus.pending || r.status == RequestStatus.offersReceived).length;
+      
+      _toplamGider = requests.where((r) => r.status == RequestStatus.ordered || r.status == RequestStatus.completed).fold(0.0, (sum, r) {
+        final selectedOffer = r.offers.firstWhere((o) => o.isSelected, orElse: () => OfferModel(id: '', requestId: '', supplierName: '', price: 0, currency: '', description: ''));
+        if (selectedOffer.currency == "TL") {
+          return sum + (selectedOffer.price * r.quantity);
+        }
+        return sum;
+      });
+
+      _lineSpots = [
+        const FlSpot(0, 0),
+        const FlSpot(1, 0),
+        const FlSpot(2, 0),
+        const FlSpot(3, 0),
+        const FlSpot(4, 0),
+        FlSpot(5, _toplamGider),
+      ];
+
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,136 +128,137 @@ class _ManagerReportsPageState extends State<ManagerReportsPage> {
           actions: [
             IconButton(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              onPressed: () {},
-              icon: const Icon(Icons.share_outlined),
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadData,
             ),
           ],
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Özet Veriler",
-                      style: AppStyles.heading2.copyWith(
-                        color: isDark ? Colors.white : AppColors.textDark,
-                      ),
-                    ),
-                    _buildFilterDropdown(isDark),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                /// Özet Kartlar
-                SizedBox(
-                  height: 130,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _buildSummaryCard(
-                        "Toplam Teklif",
-                        "45",
-                        Icons.list_alt,
-                        AppColors.info,
-                        isDark,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildSummaryCard(
-                        "Kabul Edilen",
-                        "30",
-                        Icons.check_circle_outline_rounded,
-                        AppColors.success,
-                        isDark,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildSummaryCard(
-                        "Reddedilen",
-                        "10",
-                        Icons.cancel_outlined,
-                        AppColors.error,
-                        isDark,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildSummaryCard(
-                        "Bekleyen",
-                        "5",
-                        Icons.pending_actions_outlined,
-                        AppColors.warning,
-                        isDark,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                /// Kar / Gider / Net Kar Grafiği
-                Text(
-                  "Finansal Durum",
-                  style: AppStyles.heading2.copyWith(
-                    color: isDark ? Colors.white : AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildChartContainer(
-                  isDark: isDark,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 220,
-                        child: LineChart(
-                          LineChartData(
-                            gridData: const FlGridData(show: false),
-                            titlesData: const FlTitlesData(
-                              show: true,
-                              rightTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              topTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false),
-                              ),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: 1,
-                                  reservedSize: 30,
-                                ),
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _isBackendData ? "Gerçek API Verileri" : "Yerel Mock Veriler",
+                              style: AppStyles.caption.copyWith(
+                                color: _isBackendData ? AppColors.success : AppColors.warning,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            borderData: FlBorderData(show: false),
-                            lineBarsData: [
-                              _lineSeries(profitData, AppColors.success),
-                              _lineSeries(expenseData, AppColors.error),
-                              _lineSeries(netProfitData, AppColors.info),
+                            _buildFilterDropdown(isDark),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        /// Özet Kartlar
+                        SizedBox(
+                          height: 130,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              _buildSummaryCard(
+                                "Toplam Teklif",
+                                "$_toplamTeklif",
+                                Icons.list_alt,
+                                AppColors.info,
+                                isDark,
+                              ),
+                              const SizedBox(width: 12),
+                              _buildSummaryCard(
+                                "Kabul Edilen",
+                                "$_kabulEdilen",
+                                Icons.check_circle_outline_rounded,
+                                AppColors.success,
+                                isDark,
+                              ),
+                              const SizedBox(width: 12),
+                              _buildSummaryCard(
+                                "Reddedilen",
+                                "$_reddedilen",
+                                Icons.cancel_outlined,
+                                AppColors.error,
+                                isDark,
+                              ),
+                              const SizedBox(width: 12),
+                              _buildSummaryCard(
+                                "Bekleyen",
+                                "$_bekleyen",
+                                Icons.pending_actions_outlined,
+                                AppColors.warning,
+                                isDark,
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildLegendDot(AppColors.success, "Gelir", isDark),
-                          const SizedBox(width: 16),
-                          _buildLegendDot(AppColors.error, "Gider", isDark),
-                          const SizedBox(width: 16),
-                          _buildLegendDot(AppColors.info, "Net Kar", isDark),
-                        ],
-                      ),
-                    ],
+                        const SizedBox(height: 32),
+
+                        /// Kar / Gider / Net Kar Grafiği
+                        Text(
+                          "Finansal Durum",
+                          style: AppStyles.heading2.copyWith(
+                            color: isDark ? Colors.white : AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildChartContainer(
+                          isDark: isDark,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 220,
+                                child: LineChart(
+                                  LineChartData(
+                                    gridData: const FlGridData(show: false),
+                                    titlesData: const FlTitlesData(
+                                      show: true,
+                                      rightTitles: AxisTitles(
+                                        sideTitles: SideTitles(showTitles: false),
+                                      ),
+                                      topTitles: AxisTitles(
+                                        sideTitles: SideTitles(showTitles: false),
+                                      ),
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(showTitles: false),
+                                      ),
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          interval: 1,
+                                          reservedSize: 30,
+                                        ),
+                                      ),
+                                    ),
+                                    borderData: FlBorderData(show: false),
+                                    lineBarsData: [
+                                      _lineSeries(_lineSpots, AppColors.error),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildLegendDot(AppColors.error, "Toplam Harcama (₺${_toplamGider.toStringAsFixed(0)})", isDark),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
         ),
         bottomNavigationBar: const ManagerNavBar(currentIndex: 3),
       ),

@@ -44,14 +44,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
       _completedRequests =
           requests.where((r) => r.status == RequestStatus.completed).length;
 
-      // Mock calc for total amount if we had it directly on request or sum of selected offers
+      // Calculate total amount based on ordered or completed requests
       _totalAmount = requests
           .where(
             (r) =>
-                r.status == RequestStatus.approved ||
+                r.status == RequestStatus.ordered ||
                 r.status == RequestStatus.completed,
           )
-          .fold(0, (sum, r) {
+          .fold(0.0, (sum, r) {
+            // Find selected offer
             final selectedOffer = r.offers.firstWhere(
               (o) => o.isSelected,
               orElse:
@@ -65,7 +66,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
             );
             if (selectedOffer.currency == "TL") {
-              return sum + selectedOffer.price;
+              return sum + (selectedOffer.price * r.quantity);
             }
             return sum;
           });

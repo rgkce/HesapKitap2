@@ -34,6 +34,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       return;
     }
 
+    if (_newPasswordController.text.length < 8) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Yeni şifre en az 8 karakter olmalıdır.")));
+      return;
+    }
+
     setState(() => _isLoading = true);
     // Simulate delay
     await Future.delayed(const Duration(seconds: 1));

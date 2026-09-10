@@ -35,7 +35,7 @@ import { User } from './users/entities/user.entity';
       host: 'localhost',      // Veritabanı sunucusu
       port: 5432,             // Veritabanı portu
       username: 'postgres',   // Veritabanı kullanıcı adı
-      password: 'Babamrba1.',   // Veritabanı şifresi
+      password: '1234',   // Veritabanı şifresi
       database: 'purchase_system', // Kullanılacak veritabanı
       entities: [             // Veritabanında kullanılacak entity’ler
         RequestEntity,

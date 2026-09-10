@@ -54,6 +54,8 @@ class RequestModel {
   final String id;
   final String title;
   final String description;
+  final int quantity;
+  final String urgency;
   final RequestStatus status;
   final String createdBy;
   final String companyId;
@@ -64,6 +66,8 @@ class RequestModel {
     required this.id,
     required this.title,
     required this.description,
+    required this.quantity,
+    required this.urgency,
     required this.status,
     required this.createdBy,
     required this.companyId,

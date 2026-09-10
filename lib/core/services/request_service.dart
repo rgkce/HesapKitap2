@@ -23,6 +23,8 @@ class RequestService {
         id: "req1",
         title: "Ofis Kırtasiye İhtiyacı",
         description: "A4 kağıt, kalem, zımba vb. aylık ihtiyaç.",
+        quantity: 5,
+        urgency: "Normal",
         status: RequestStatus.pending,
         createdBy: "user1", // Assume existing user ID
         companyId: "comp1",
@@ -34,6 +36,8 @@ class RequestService {
         id: "req2",
         title: "Laptop Bataryası",
         description: "Dell Latitude 5420 için yedek batarya.",
+        quantity: 2,
+        urgency: "Acil",
         status: RequestStatus.offersReceived,
         createdBy: "user1",
         companyId: "comp1",
@@ -79,7 +83,7 @@ class RequestService {
     return [];
   }
 
-  Future<bool> createRequest(String title, String description) async {
+  Future<bool> createRequest(String title, String description, int quantity, String urgency) async {
     final user = UserService().currentUser;
     if (user == null) return false;
 
@@ -87,6 +91,8 @@ class RequestService {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       description: description,
+      quantity: quantity,
+      urgency: urgency,
       status: RequestStatus.pending,
       createdBy: user.id,
       companyId: user.companyId,
@@ -115,6 +121,8 @@ class RequestService {
         id: req.id,
         title: req.title,
         description: req.description,
+        quantity: req.quantity,
+        urgency: req.urgency,
         status: newStatus,
         createdBy: req.createdBy,
         companyId: req.companyId,
@@ -152,6 +160,8 @@ class RequestService {
         id: req.id,
         title: req.title,
         description: req.description,
+        quantity: req.quantity,
+        urgency: req.urgency,
         status: RequestStatus.approved, // Ensure status is approved
         createdBy: req.createdBy,
         companyId: req.companyId,
@@ -172,6 +182,8 @@ class RequestService {
         id: req.id,
         title: req.title,
         description: req.description,
+        quantity: req.quantity,
+        urgency: req.urgency,
         status: RequestStatus.ordered,
         createdBy: req.createdBy,
         companyId: req.companyId,
@@ -209,6 +221,8 @@ class RequestService {
         id: req.id,
         title: req.title,
         description: req.description,
+        quantity: req.quantity,
+        urgency: req.urgency,
         status: RequestStatus.offersReceived, // Back to offersReceived
         createdBy: req.createdBy,
         companyId: req.companyId,
@@ -229,6 +243,8 @@ class RequestService {
         id: req.id,
         title: req.title,
         description: req.description,
+        quantity: req.quantity,
+        urgency: req.urgency,
         status: RequestStatus.completed,
         createdBy: req.createdBy,
         companyId: req.companyId,

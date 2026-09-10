@@ -3,6 +3,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:hesapkitap/core/theme/app_colors.dart';
 import 'package:hesapkitap/core/theme/app_styles.dart';
 import 'package:hesapkitap/features/navigation/procurement_navbar.dart';
+import 'package:hesapkitap/core/services/request_service.dart';
+import 'package:hesapkitap/core/models/request_model.dart';
+import 'package:hesapkitap/core/services/api_service.dart';
 
 class ProcurementReportsPage extends StatefulWidget {
   const ProcurementReportsPage({super.key});
@@ -12,6 +15,69 @@ class ProcurementReportsPage extends StatefulWidget {
 }
 
 class _ProcurementReportsPageState extends State<ProcurementReportsPage> {
+  bool _isLoading = true;
+  bool _isBackendData = false;
+
+  double _toplamGider = 0;
+  int _toplamSiparis = 0;
+  int _bekleyenSiparis = 0;
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
+    // 1. Backend'den veri çekmeyi dene
+    final apiService = ApiService();
+    final summary = await apiService.fetchRequestSummary();
+    final spending = await apiService.fetchMonthlySpending();
+
+    if (summary != null && spending != null) {
+      setState(() {
+        _isBackendData = true;
+        
+        // Backend'de onaylanmış olanlar sipariş sayılır
+        _toplamSiparis = summary['approved'] ?? 0;
+        
+        // Bekleyen siparişler (onay bekleyen talepler)
+        _bekleyenSiparis = summary['pending'] ?? 0;
+        
+        // Toplam Gider
+        double spendSum = 0;
+        for (var item in spending) {
+          final amt = item['totalAmount'];
+          spendSum += amt is num ? amt.toDouble() : double.tryParse(amt.toString()) ?? 0.0;
+        }
+        _toplamGider = spendSum;
+
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // 2. Fallback: Yerel mock veritabanı hesaplaması
+    final requests = RequestService().getRequests();
+    setState(() {
+      _isBackendData = false;
+      _toplamSiparis = requests.where((r) => r.status == RequestStatus.ordered || r.status == RequestStatus.completed).length;
+      _bekleyenSiparis = requests.where((r) => r.status == RequestStatus.approved).length; // Approved waiting to be ordered
+      
+      _toplamGider = requests.where((r) => r.status == RequestStatus.ordered || r.status == RequestStatus.completed).fold(0.0, (sum, r) {
+        final selectedOffer = r.offers.firstWhere((o) => o.isSelected, orElse: () => OfferModel(id: '', requestId: '', supplierName: '', price: 0, currency: '', description: ''));
+        if (selectedOffer.currency == "TL") {
+          return sum + (selectedOffer.price * r.quantity);
+        }
+        return sum;
+      });
+
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -27,160 +93,168 @@ class _ProcurementReportsPageState extends State<ProcurementReportsPage> {
           actions: [
             IconButton(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              onPressed: () {},
-              icon: const Icon(Icons.share_outlined),
+              icon: const Icon(Icons.refresh),
+              onPressed: _loadData,
             ),
           ],
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// Sayfa Başlığı
-                Text(
-                  "Finansal Özet",
-                  style: AppStyles.heading2.copyWith(
-                    color: isDark ? Colors.white : AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 20),
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _isBackendData ? "Gerçek API Verileri" : "Yerel Mock Veriler",
+                              style: AppStyles.caption.copyWith(
+                                color: _isBackendData ? AppColors.success : AppColors.warning,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
 
-                /// Özet Kartlar
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSummaryCard(
-                        "Toplam Gelir",
-                        "₺12.500",
-                        Icons.trending_up,
-                        AppColors.success,
-                        isDark,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildSummaryCard(
-                        "Toplam Gider",
-                        "₺8.200",
-                        Icons.trending_down,
-                        AppColors.error,
-                        isDark,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildSummaryCard(
-                  "Net Kâr",
-                  "₺4.300",
-                  Icons.account_balance_wallet_outlined,
-                  AppColors.primary,
-                  isDark,
-                  isFullWidth: true,
-                ),
+                        /// Sayfa Başlığı
+                        Text(
+                          "Finansal Özet",
+                          style: AppStyles.heading2.copyWith(
+                            color: isDark ? Colors.white : AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
 
-                const SizedBox(height: 32),
+                        /// Özet Kartlar
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildSummaryCard(
+                                "Verilen Sipariş",
+                                "$_toplamSiparis Adet",
+                                Icons.shopping_cart_checkout,
+                                AppColors.success,
+                                isDark,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildSummaryCard(
+                                "Toplam Gider",
+                                "₺${_toplamGider.toStringAsFixed(0)}",
+                                Icons.trending_down,
+                                AppColors.error,
+                                isDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        _buildSummaryCard(
+                          _isBackendData ? "Bekleyen Talepler" : "Bekleyen Sipariş (Onaylanmış)",
+                          "$_bekleyenSiparis Adet",
+                          Icons.pending_actions_outlined,
+                          AppColors.warning,
+                          isDark,
+                          isFullWidth: true,
+                        ),
 
-                /// Grafik Bölümü
-                Text(
-                  "Harcama Dağılımı",
-                  style: AppStyles.heading2.copyWith(
-                    color: isDark ? Colors.white : AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildChartContainer(
-                  isDark: isDark,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 200,
-                        child: PieChart(
-                          PieChartData(
-                            borderData: FlBorderData(show: false),
-                            centerSpaceRadius: 40,
-                            sectionsSpace: 4,
-                            sections: [
-                              PieChartSectionData(
-                                value: 60,
-                                title: "%60",
-                                radius: 60,
-                                color: AppColors.success,
-                                titleStyle: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
+                        const SizedBox(height: 32),
+
+                        /// Grafik Bölümü
+                        Text(
+                          "Harcama Dağılımı",
+                          style: AppStyles.heading2.copyWith(
+                            color: isDark ? Colors.white : AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildChartContainer(
+                          isDark: isDark,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 200,
+                                child: PieChart(
+                                  PieChartData(
+                                    borderData: FlBorderData(show: false),
+                                    centerSpaceRadius: 40,
+                                    sectionsSpace: 4,
+                                    sections: [
+                                      PieChartSectionData(
+                                        value: _toplamGider > 0 ? _toplamGider : 1,
+                                        title: "Gider",
+                                        radius: 60,
+                                        color: AppColors.error,
+                                        titleStyle: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              PieChartSectionData(
-                                value: 40,
-                                title: "%40",
-                                radius: 60,
-                                color: AppColors.error,
-                                titleStyle: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildLegendDot(AppColors.error, "Toplam Harcama", isDark),
+                                ],
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildLegendDot(AppColors.success, "Gelir", isDark),
-                          const SizedBox(width: 24),
-                          _buildLegendDot(AppColors.error, "Gider", isDark),
-                        ],
-                      ),
-                    ],
+
+                        const SizedBox(height: 32),
+
+                        /// Aksiyon Butonları
+                        _buildActionButton(
+                          "Filtrele",
+                          Icons.filter_list_rounded,
+                          isDark ? AppColors.surfaceDark : Colors.white,
+                          isDark ? Colors.white : AppColors.textDark,
+                          () {},
+                          isDark,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildActionButton(
+                                "PDF Aktar",
+                                Icons.picture_as_pdf_outlined,
+                                AppColors.primary,
+                                Colors.white,
+                                () {},
+                                isDark,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildActionButton(
+                                "Excel Aktar",
+                                Icons.table_chart_outlined,
+                                AppColors.success,
+                                Colors.white,
+                                () {},
+                                isDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 32),
-
-                /// Aksiyon Butonları
-                _buildActionButton(
-                  "Filtrele",
-                  Icons.filter_list_rounded,
-                  isDark ? AppColors.surfaceDark : Colors.white,
-                  isDark ? Colors.white : AppColors.textDark,
-                  () {},
-                  isDark,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        "PDF Aktar",
-                        Icons.picture_as_pdf_outlined,
-                        AppColors.primary,
-                        Colors.white,
-                        () {},
-                        isDark,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionButton(
-                        "Excel Aktar",
-                        Icons.table_chart_outlined,
-                        AppColors.success,
-                        Colors.white,
-                        () {},
-                        isDark,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
         ),
         bottomNavigationBar: const ProcurementNavBar(currentIndex: 3),
       ),
