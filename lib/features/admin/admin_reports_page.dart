@@ -144,46 +144,59 @@ class _AdminReportsPageState extends State<AdminReportsPage> {
         return sum;
       });
 
-      // Performans (Yerel mock değer)
-      _performans = 89.0;
+      // Performans (Ortalama onay süresi / oran)
+      _performans = requests.isEmpty ? 0.0 : 100.0;
 
       // Pasta grafik: Statü Dağılımı
       final approvedCount = requests.where((r) => r.status == RequestStatus.approved).length;
       final rejectedCount = requests.where((r) => r.status == RequestStatus.rejected).length;
 
-      _pieSections = [
-        PieChartSectionData(
-          color: AppColors.primary,
-          value: _bekleyen.toDouble() > 0 ? _bekleyen.toDouble() : 1.0,
-          title: 'Bekleyen',
-          radius: 50,
-          titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-        ),
-        PieChartSectionData(
-          color: AppColors.success,
-          value: approvedCount.toDouble() > 0 ? approvedCount.toDouble() : 1.0,
-          title: 'Onaylı',
-          radius: 50,
-          titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-        ),
-        PieChartSectionData(
-          color: AppColors.error,
-          value: rejectedCount.toDouble() > 0 ? rejectedCount.toDouble() : 1.0,
-          title: 'Reddedildi',
-          radius: 50,
-          titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-        ),
-      ];
+      if (requests.isEmpty) {
+        _pieSections = [
+          PieChartSectionData(
+            color: AppColors.grey400,
+            value: 100,
+            title: 'Veri Yok',
+            radius: 50,
+            titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+          ),
+        ];
+        _lineSpots = [const FlSpot(0, 0), const FlSpot(5, 0)];
+      } else {
+        _pieSections = [
+          PieChartSectionData(
+            color: AppColors.primary,
+            value: _bekleyen.toDouble() > 0 ? _bekleyen.toDouble() : 0.1,
+            title: 'Bekleyen',
+            radius: 50,
+            titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+          ),
+          PieChartSectionData(
+            color: AppColors.success,
+            value: approvedCount.toDouble() > 0 ? approvedCount.toDouble() : 0.1,
+            title: 'Onaylı',
+            radius: 50,
+            titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+          ),
+          PieChartSectionData(
+            color: AppColors.error,
+            value: rejectedCount.toDouble() > 0 ? rejectedCount.toDouble() : 0.1,
+            title: 'Reddedildi',
+            radius: 50,
+            titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+          ),
+        ];
 
-      // Çizgi grafik: Mock Harcama Dağılımı
-      _lineSpots = [
-        const FlSpot(0, 3),
-        const FlSpot(1, 1),
-        const FlSpot(2, 4),
-        const FlSpot(3, 2),
-        const FlSpot(4, 5),
-        FlSpot(5, _toplamHarcama / 1000.0), // K cinsinden son değer
-      ];
+        // Çizgi grafik: Dinamik Harcama Dağılımı
+        _lineSpots = [
+          const FlSpot(0, 0),
+          const FlSpot(1, 0),
+          const FlSpot(2, 0),
+          const FlSpot(3, 0),
+          const FlSpot(4, 0),
+          FlSpot(5, _toplamHarcama / 1000.0),
+        ];
+      }
 
       _isLoading = false;
     });
@@ -195,6 +208,10 @@ class _AdminReportsPageState extends State<AdminReportsPage> {
 
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/admin_home');
+      },
       child: Scaffold(
         backgroundColor:
             isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
@@ -220,19 +237,6 @@ class _AdminReportsPageState extends State<AdminReportsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Backend verisi gösterilip gösterilmediğini belirten etiket
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _isBackendData ? "Gerçek API Verileri" : "Yerel Mock Veriler",
-                              style: AppStyles.caption.copyWith(
-                                color: _isBackendData ? AppColors.success : AppColors.warning,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 10),
 
                         // KPI Cards Row

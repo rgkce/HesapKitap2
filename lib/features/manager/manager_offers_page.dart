@@ -43,8 +43,12 @@ class _ManagerOffersPageState extends State<ManagerOffersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/manager_home');
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Gelen Teklifler"),

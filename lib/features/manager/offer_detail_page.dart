@@ -11,8 +11,8 @@ class OfferDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: true,
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(

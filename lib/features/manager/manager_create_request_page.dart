@@ -62,8 +62,12 @@ class _ManagerCreateRequestPageState extends State<ManagerCreateRequestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/manager_home');
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Talep Oluştur"),

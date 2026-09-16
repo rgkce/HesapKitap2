@@ -45,8 +45,12 @@ class _AdminAllRequestsPageState extends State<AdminAllRequestsPage> {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return WillPopScope(
-      onWillPop: () async => false, // Nav bar handles navigation
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/admin_home');
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Tüm Talepler"),

@@ -84,6 +84,10 @@ class _ProcurementReportsPageState extends State<ProcurementReportsPage> {
 
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/procurement_home');
+      },
       child: Scaffold(
         backgroundColor:
             isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
@@ -109,18 +113,7 @@ class _ProcurementReportsPageState extends State<ProcurementReportsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _isBackendData ? "Gerçek API Verileri" : "Yerel Mock Veriler",
-                              style: AppStyles.caption.copyWith(
-                                color: _isBackendData ? AppColors.success : AppColors.warning,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                        const SizedBox(height: 10),
                         const SizedBox(height: 20),
 
                         /// Sayfa Başlığı
@@ -215,42 +208,7 @@ class _ProcurementReportsPageState extends State<ProcurementReportsPage> {
 
                         const SizedBox(height: 32),
 
-                        /// Aksiyon Butonları
-                        _buildActionButton(
-                          "Filtrele",
-                          Icons.filter_list_rounded,
-                          isDark ? AppColors.surfaceDark : Colors.white,
-                          isDark ? Colors.white : AppColors.textDark,
-                          () {},
-                          isDark,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildActionButton(
-                                "PDF Aktar",
-                                Icons.picture_as_pdf_outlined,
-                                AppColors.primary,
-                                Colors.white,
-                                () {},
-                                isDark,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildActionButton(
-                                "Excel Aktar",
-                                Icons.table_chart_outlined,
-                                AppColors.success,
-                                Colors.white,
-                                () {},
-                                isDark,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -354,39 +312,6 @@ class _ProcurementReportsPageState extends State<ProcurementReportsPage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildActionButton(
-    String label,
-    IconData icon,
-    Color bgColor,
-    Color textColor,
-    VoidCallback onTap,
-    bool isDark,
-  ) {
-    return Material(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(16),
-      elevation: isDark ? 0 : 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: textColor, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: AppStyles.bodyTextBold.copyWith(color: textColor),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

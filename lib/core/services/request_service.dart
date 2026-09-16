@@ -13,55 +13,9 @@ class RequestService {
 
   final List<RequestModel> _requests = [];
 
-  // Mock Data Initialization
+  // Mock Data Initialization (starts clean)
   void initMockData() {
-    if (_requests.isNotEmpty) return;
-
-    // Add some dummy requests
-    _requests.add(
-      RequestModel(
-        id: "req1",
-        title: "Ofis Kırtasiye İhtiyacı",
-        description: "A4 kağıt, kalem, zımba vb. aylık ihtiyaç.",
-        quantity: 5,
-        urgency: "Normal",
-        status: RequestStatus.pending,
-        createdBy: "user1", // Assume existing user ID
-        companyId: "comp1",
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-    );
-    _requests.add(
-      RequestModel(
-        id: "req2",
-        title: "Laptop Bataryası",
-        description: "Dell Latitude 5420 için yedek batarya.",
-        quantity: 2,
-        urgency: "Acil",
-        status: RequestStatus.offersReceived,
-        createdBy: "user1",
-        companyId: "comp1",
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        offers: [
-          OfferModel(
-            id: 'off1',
-            requestId: 'req2',
-            supplierName: 'TechStore',
-            price: 1500,
-            currency: 'TL',
-            description: 'Orijinal Batarya',
-          ),
-          OfferModel(
-            id: 'off2',
-            requestId: 'req2',
-            supplierName: 'BataryaDünyası',
-            price: 1200,
-            currency: 'TL',
-            description: 'Muadil Batarya',
-          ),
-        ],
-      ),
-    );
+    // Starts with clean empty state until user adds data
   }
 
   List<RequestModel> getRequests() {

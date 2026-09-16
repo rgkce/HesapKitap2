@@ -185,8 +185,14 @@ class _ProcurementAddQuotePageState extends State<ProcurementAddQuotePage> {
   Widget build(BuildContext context) {
     final bool isFromList = widget.request != null;
 
-    return WillPopScope(
-      onWillPop: () async => isFromList,
+    return PopScope(
+      canPop: isFromList,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        if (!isFromList) {
+          Navigator.pushReplacementNamed(context, '/procurement_home');
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Teklif Ekle"),

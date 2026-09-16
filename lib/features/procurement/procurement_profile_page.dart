@@ -12,8 +12,12 @@ class ProcurementProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = UserService().currentUser;
 
-    return WillPopScope(
-      onWillPop: () async => false, // Telefonun geri tuşunu engelle
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/procurement_home');
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Profil"),

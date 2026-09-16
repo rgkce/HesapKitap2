@@ -12,8 +12,12 @@ class ManagerProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = UserService().currentUser;
 
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/manager_home');
+      },
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Profil"),

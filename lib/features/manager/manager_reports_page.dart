@@ -119,6 +119,10 @@ class _ManagerReportsPageState extends State<ManagerReportsPage> {
 
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        Navigator.pushReplacementNamed(context, '/manager_home');
+      },
       child: Scaffold(
         backgroundColor:
             isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
@@ -145,15 +149,8 @@ class _ManagerReportsPageState extends State<ManagerReportsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(
-                              _isBackendData ? "Gerçek API Verileri" : "Yerel Mock Veriler",
-                              style: AppStyles.caption.copyWith(
-                                color: _isBackendData ? AppColors.success : AppColors.warning,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                             _buildFilterDropdown(isDark),
                           ],
                         ),
